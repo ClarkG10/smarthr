@@ -146,12 +146,30 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
+        $prompt = "Analyze the qualifications provided and return a score between 0 and 100 based on relevance to the water district job position, which is: $jobPosition. 
+        The minimum requirements to consider are:
+        - Education: $jobMinimumEducation
+        - Training: $jobMinimumTraining
+        - Experience: $jobMinimumExperience
+        - Eligibility: $jobMinimumEligibility
+        - Competency: $jobMinimumCompetency
+    
+        The applicant's qualifications are:
+        - Education: $education
+        - Program: $program
+        - Training: $training
+        - Experience: $experience
+        - Eligibility: $eligibility
+        - Competency: $competency
+    
+        Answer with score only. Take time to read the requirements. No additional text or explanation is required.";
+
         $data = [
             'contents' => [
                 [
                     'parts' => [
                         [
-                            'text' => "Analyze the qualifications provided and return a score between 0 and 100 based on relevance to water district job position which is $jobPosition and the minimum qualification to consider are Education: $jobMinimumEducation, Training: $jobMinimumTraining, Experience: $jobMinimumExperience, Eligibility: $jobMinimumEligibility, Competency: $jobMinimumCompetency. Answer with score only. \n\nThese are the qualifications of the applicant: Education: $education \nProgram: $program\nTraining: $training\nExperience: $experience\nEligibility: $eligibility\nCompetency: $competency"
+                            'text' => $prompt
                         ]
                     ]
                 ]
@@ -165,7 +183,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-        // Execute the cURL request and get the response
         $response = curl_exec($ch);
         if ($response === false) {
             error_log('Curl error: ' . curl_error($ch));
@@ -175,7 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
         curl_close($ch);
 
-        // Parse the Gemini response to get the score
         $decodedResponse = json_decode($response, true);
         if (isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
             $score = trim($decodedResponse['candidates'][0]['content']['parts'][0]['text']);
@@ -186,15 +202,27 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
 
     // Function to analyze document text using Gemini API
-    function analyzeDocumentWithGemini($documentText, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency)
+    function analyzeDocumentWithGemini($documentText, $jobPosition, $fileType)
     {
-        $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk'; // Replace with your Gemini API key
+        $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
+
+        $prompt = "Analyze the following document text and return a score between 0 and 100 based on its relevance to the water district job position: '$jobPosition'. 
+
+        The document to consider is of type: $fileType.
+
+        Here is the applicant's document:
+
+        $documentText
+
+        Please provide the score only, without any additional text or explanation.";
 
         $data = [
             'contents' => [
                 [
                     'parts' => [
-                        ['text' => "Analyze the following document text and return a score between 0 and 100 based on relevance to water district job position which is $jobPosition and the minimum qualification to consider are Education: $jobMinimumEducation, Training: $jobMinimumTraining, Experience: $jobMinimumExperience, Eligibility: $jobMinimumEligibility, Competency: $jobMinimumCompetency. Answer with score only. Document Text: $documentText"]
+                        [
+                            'text' => $prompt
+                        ]
                     ]
                 ]
             ]
@@ -207,7 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-        // Execute the cURL request and get the response
         $response = curl_exec($ch);
         if ($response === false) {
             error_log('Curl error: ' . curl_error($ch));
@@ -217,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
         curl_close($ch);
 
-        // Parse the Gemini response to get the score
+        // Get the score
         $decodedResponse = json_decode($response, true);
         if (isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
             $score = trim($decodedResponse['candidates'][0]['content']['parts'][0]['text']);
@@ -233,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $documentWeights = [
         'resume' => 0.45,  // // 40 percent
         'pds' => 0.05, // 5 percent
-        'performance_rating' => 0.1, // 10 percent
+        'performance_rating' => 0.05, // 5 percent
         'certificate' => 0.15, // 15 percent
         'trainingCertificate' => 0.15, // 15 percent
         'tor' => 0.05, // 5 percent
@@ -241,24 +268,30 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $files = [
         'resume' => $resume_path,
-        'pds' => $filepds_path,
-        'performance_rating' => $filerating_path,
-        'certificate' => $filecertificate_path,
-        'trainingCertificate' => $filecertificateTraining_path,
-        'tor' => $filetor_path,
+        'personal_data_sheet' => $filepds_path,
+        'performance_rating_sheet' => $filerating_path,
+        'certificate_of_eligibility' => $filecertificate_path,
+        'training_certificate' => $filecertificateTraining_path,
+        'transcript_of_records' => $filetor_path,
     ];
 
     foreach ($files as $fileType => $file) {
+
+        $jsonFileType = json_encode($fileType);
+
         if (!empty($file)) {
             // Parse PDF, DOC, DOCX to text
             $parsedText = parseFileToText($upload_dir . $file);
             $documentText .= $parsedText . "\n";
 
             // Analyze document with Gemini API and get points
-            $documentScore = analyzeDocumentWithGemini($parsedText, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency);
+            $documentScore = analyzeDocumentWithGemini($parsedText, $jobPosition, $jsonFileType);
 
             // Apply the weight for the document type
             $documentsPoints += $documentScore * $documentWeights[$fileType];
+
+            $jsonScore = json_encode($documentsPoints);
+            echo "<script>console.log('Document's score: " . $jsonScore . "');</script>";  // for debugging
 
             // for Log or debug output lang
             error_log("Score for $fileType: $documentScore, Weighted Score: " . ($documentScore * $documentWeights[$fileType]));
@@ -270,6 +303,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     // Get the qualifications score
     $qualificationScore = analyzeQualificationsWithGemini($education, $final_program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency);
+
+    $jsonScore = json_encode($qualificationScore);
+    echo "<script>console.log('Qualification score : " . $jsonScore . "');</script>"; // for debugging
 
     // Calculate the final rating by averaging the qualifications and documents scores
     $finalRating = ($qualificationScore + $documentsPoints) / 2;
