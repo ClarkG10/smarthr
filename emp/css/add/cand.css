@@ -1,0 +1,133 @@
+.decline-modal {
+  /* border: 1px solid red; */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: none;
+  justify-content: center;
+  padding-top: 20px;
+  padding: 10px;
+}
+
+.decline-content {
+  background-color: white;
+  max-width: 400px;
+  width: 100%;
+  height: 230px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.decline-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.decline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.decline-body .decline-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.decline-body .decline-input textarea {
+  width: 100%;
+  height: 70px;
+  padding: 5px;
+}
+
+.decline-input-btn {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+}
+
+.decline-input-btn button {
+  padding: 5px 7px;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  color: white;
+  border-radius: 5px;
+}
+
+.approve-modal {
+  /* border: 1px solid red; */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: none;
+  justify-content: center;
+  padding-top: 20px;
+  padding: 10px;
+}
+
+.approve-content {
+  background-color: white;
+  max-width: 400px;
+  width: 100%;
+  height: 230px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.approve-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.approve-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approve-body .approve-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.approve-body .approve-input textarea {
+  width: 100%;
+  height: 70px;
+  padding: 5px;
+}
+
+.approve-input-btn {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+}
+
+.approve-input-btn button {
+  padding: 5px 7px;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  color: white;
+  border-radius: 5px;
+}

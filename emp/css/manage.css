@@ -1,0 +1,283 @@
+* {
+  font-size: 15px;
+  scroll-behavior: smooth;
+}
+
+main {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: 100vh;
+  padding-top: 50px;
+  padding-left: 100px;
+}
+
+section {
+  width: 100%;
+  height: 100%;
+}
+
+.manage {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  overflow: auto;
+}
+
+.wrap {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  height: 100%;
+}
+
+.wrap .label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+}
+
+.wrap .label .div {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-weight: 600;
+}
+
+.wrap .label .div a {
+  text-decoration: underline;
+}
+
+.wrap .label button {
+  padding: 5px 7px;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  font-size: 12px;
+  color: white;
+  font-weight: 600;
+  background-color: #2563eb;
+}
+
+.wrap .label button i {
+  margin-right: 5px;
+}
+
+.wrap .table {
+  /* border: 1px solid red; */
+  padding: 5px;
+  width: 100%;
+  height: calc(100% - 60px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.wrap .table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wrap .table table th,
+.wrap .table table td {
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+}
+
+.wrap .table table th {
+  font-size: 13px;
+}
+
+.wrap .table table td {
+  font-size: 12px;
+}
+
+.job-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.job-buttons button {
+  border: none;
+  outline: none;
+  padding: 5px 7px;
+  font-weight: 600;
+  font-size: 12px;
+  color: white;
+  border-radius: 5px;
+}
+
+/* ADD JOB MODAL CSS CONTENTS */
+
+/* FOR ADD JOBS */
+.add-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 5;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: none;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.add-modal .add-content {
+  background-color: white;
+  max-width: 400px;
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.add-modal .add-content .add-header {
+  padding: 10px;
+  text-align: center;
+}
+
+.add-body {
+  padding: 0px 20px;
+}
+
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add-body .add-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 5px;
+}
+
+.add-body .add-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.add-body .add-input input {
+  width: 100%;
+  height: 30px;
+  padding-left: 5px;
+}
+
+.add-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+}
+
+.add-buttons button,
+.add-buttons input {
+  padding: 5px 7px;
+  border: none;
+  outline: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  main {
+    padding-left: 0px;
+    font-size: 13px;
+  }
+
+  section {
+    padding: 0px;
+  }
+
+  .wrap .table table th {
+    font-size: 12px;
+  }
+
+  .wrap .table table td {
+    font-size: 10px;
+  }
+}
+
+.update-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 5;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: none;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.update-modal .update-content {
+  background-color: white;
+  max-width: 400px;
+  width: 100%;
+  height: 490px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.update-modal .update-content .update-header {
+  padding: 10px;
+  text-align: center;
+}
+
+.update-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0px 20px;
+  margin-top: -15px;
+}
+
+.update-body .update-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 5px;
+}
+
+.update-body .update-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.update-body .update-input input {
+  width: 100%;
+  height: 30px;
+  padding-left: 5px;
+  font-size: 12px;
+}
+
+.update-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+}
+
+.update-buttons button,
+.update-buttons input {
+  padding: 5px 7px;
+  border: none;
+  outline: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 5px;
+  font-size: 12px;
+}

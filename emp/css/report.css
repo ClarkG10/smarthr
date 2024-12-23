@@ -1,0 +1,46 @@
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 10px;
+  column-gap: 10px;
+}
+
+.charts .wrap {
+  /* border: 1px solid red; */
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.charts .wrap .label {
+  padding: 10px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+}
+
+.charts .wrap .label h4 {
+  text-transform: uppercase;
+}
+
+.charts .wrap .table {
+  width: 100%;
+  /* border: 1px solid red; */
+  height: calc(100% - 40px);
+  padding: 5px;
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.charts .wrap .table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.charts .wrap .table table th,
+.charts .wrap .table table td {
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+  font-size: 13px;
+}
