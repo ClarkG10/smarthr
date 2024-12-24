@@ -330,7 +330,6 @@ require "handlers/logged_info.php";
                                     </table>
                                 </div>
                             </div>
-
                             <!-- FOR SCHEDULE DETAILS -->
                             <?php if ($applicationData['sched_status'] !== "Declined"): ?>
                                 <?php

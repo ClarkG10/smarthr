@@ -5,7 +5,7 @@ require "authenticate.php";
 require "user_logged.php";
 
 // dependencies for parsing PDFs and DOCX files
-require 'D:/laragon/www/smarthr/vendor/autoload.php'; // e change ni depende saimong path
+require 'D:/laragon/www/smarthr/vendor/autoload.php'; // e change ni depende saimong path 
 
 use PhpOffice\PhpWord\IOFactory;
 use Smalot\PdfParser\Parser;
@@ -146,14 +146,16 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
-        $prompt = "Analyze the qualifications provided and return a score between 0 and 100 based on relevance to the water district job position, which is: $jobPosition. 
-        The minimum requirements to consider are:
+        $prompt = "
+        Analyze the qualifications provided and return a score between 0 and 100 with decimals based on relevance to the water district job position: '$jobPosition'.
+        
+        The minimum requirements for this position are as follows:
         - Education: $jobMinimumEducation
         - Training: $jobMinimumTraining
         - Experience: $jobMinimumExperience
         - Eligibility: $jobMinimumEligibility
         - Competency: $jobMinimumCompetency
-    
+        
         The applicant's qualifications are:
         - Education: $education
         - Program: $program
@@ -161,8 +163,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         - Experience: $experience
         - Eligibility: $eligibility
         - Competency: $competency
-    
-        Answer with score only. Take time to read the requirements. No additional text or explanation is required.";
+        
+        Please assess the applicant's qualifications against these requirements.
+        
+        Return the score only. If the qualifications do not meet the minimum requirements or are irrelevant, return an approriate score. No additional text or explanation is required.";
 
         $data = [
             'contents' => [
@@ -206,15 +210,26 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
-        $prompt = "Analyze the following document text and return a score between 0 and 100 based on its relevance to the water district job position: '$jobPosition'. 
-
-        The document to consider is of type: $fileType.
-
+        $prompt = "
+        Analyze the following document text and return a score between 0 and 100 with decimals based on its relevance to the water district job position: '$jobPosition'.
+        
+        Please pay special attention to the document type: $fileType. It is crucial that you accurately assess the content and format of the document based on the following job requirements and expectations:
+        
+        1. Resume: Assess the applicant's professional experience, skills, and qualifications.
+        2. Personal Data Sheet: Check if all required personal and professional information is provided.
+        3. Performance Rating Sheet: Evaluate the applicant's past performance and achievements.
+        4. Certificate of Eligibility: Ensure the eligibility criteria are met and appropriately verified.
+        5. Training Certificate: Assess whether the training aligns with the job requirements.
+        6. Transcript of Records: Evaluate if the educational qualifications meet the standards for the job.
+    
+        If the document is invalid, irrelevant, or does not meet the expected content for the specified document type, please return a score of **0**. 
+        
         Here is the applicant's document:
-
+    
         $documentText
+    
+        Please provide the score only, without any additional text or explanation. If the document is deemed irrelevant or incorrect, return a score of 0.";
 
-        Please provide the score only, without any additional text or explanation.";
 
         $data = [
             'contents' => [
@@ -256,14 +271,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $documentText = '';
     $documentsPoints = 0;
+    $documentScores = [];
     // overall 100 percent
     $documentWeights = [
-        'resume' => 0.45,  // // 40 percent
-        'pds' => 0.05, // 5 percent
-        'performance_rating' => 0.05, // 5 percent
-        'certificate' => 0.15, // 15 percent
-        'trainingCertificate' => 0.15, // 15 percent
-        'tor' => 0.05, // 5 percent
+        'resume' => 0.30,  // 30 percent 
+        'personal_data_sheet' => 0.10, // 10 percent 
+        'performance_rating_sheet' => 0.15, // 15 percent 
+        'certificate_of_eligibility' => 0.20, // 20 percent 
+        'training_certificate' => 0.15, // 15 percent 
+        'transcript_of_records' => 0.10, // 10 percent 
     ];
 
     $files = [
@@ -284,22 +300,24 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $parsedText = parseFileToText($upload_dir . $file);
             $documentText .= $parsedText . "\n";
 
-            // Analyze document with Gemini API and get points
             $documentScore = analyzeDocumentWithGemini($parsedText, $jobPosition, $jsonFileType);
 
             // Apply the weight for the document type
-            $documentsPoints += $documentScore * $documentWeights[$fileType];
+            $weightedScore = intval($documentScore) * floatval($documentWeights[$fileType]);
+            $documentsPoints += $weightedScore;
 
-            $jsonScore = json_encode($documentsPoints);
-            echo "<script>console.log('Document's score: " . $jsonScore . "');</script>";  // for debugging
+            // Store the score for this file type
+            $documentScores[$fileType] = $weightedScore;
 
-            // for Log or debug output lang
-            error_log("Score for $fileType: $documentScore, Weighted Score: " . ($documentScore * $documentWeights[$fileType]));
+            // Log document score for debugging purposes
+            $jsonScore = json_encode($weightedScore);
+            echo "<script>console.log('Document\'s score: " . $jsonScore . "');</script>";  // for debugging
         }
     }
 
+
     // update program 
-    $final_program = $program === `Others` ? $other_program : $program;
+    $final_program = $program === 'Others' ? $other_program : $program;
 
     // Get the qualifications score
     $qualificationScore = analyzeQualificationsWithGemini($education, $final_program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency);
@@ -317,8 +335,50 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $insert_sql->bind_param("iisssssssssssssssssssi", $userId, $applied_job_id, $street, $city, $province, $zip_code, $status, $home_phone, $facebook_profile, $education, $final_program, $training, $experience, $eligibility, $competency, $resume_path, $filepds_path, $filerating_path, $filecertificate_path, $filecertificateTraining_path, $filetor_path, $finalRating);
 
     if ($insert_sql->execute()) {
-        echo '<script>alert("Successfully Submitted."); window.location.href = "http://localhost/smarthr/applicant/applications.php"</script>';
+
+        $applied_id = $conn->insert_id;
+        $resume_score = $documentScores['resume'] ?? 0;
+        $pds_score = $documentScores['personal_data_sheet'] ?? 0;
+        $performance_rating_score = $documentScores['performance_rating_sheet'] ?? 0;
+        $certificate_score = $documentScores['certificate_of_eligibility'] ?? 0;
+        $training_certificate_score = $documentScores['training_certificate'] ?? 0;
+        $tor_score = $documentScores['transcript_of_records'] ?? 0;
+
+        $insert_scores_sql = $conn->prepare("
+        INSERT INTO `applicant_scores` (
+            `applicants_id`, 
+            `applied_id`, 
+            `resume_points`, 
+            `personal_data_sheet_points`, 
+            `performance_rating_sheet_points`, 
+            `certificate_of_eligibility_points`, 
+            `training_certificate_points`, 
+            `transcript_of_records_points`, 
+            `qualification_score`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        $insert_scores_sql->bind_param(
+            "iiiiiiiii",
+            $userId,
+            $applied_id,
+            $resume_score,
+            $pds_score,
+            $performance_rating_score,
+            $certificate_score,
+            $training_certificate_score,
+            $tor_score,
+            $qualificationScore
+        );
+
+        if ($insert_scores_sql->execute()) {
+            echo '<script>alert("Successfully Submitted."); window.location.href = "http://localhost/smarthr/applicant/applications.php"</script>';
+        } else {
+            error_log('Error inserting scores: ' . $insert_scores_sql->error);
+            echo 'Error inserting scores: ' . $insert_scores_sql->error;
+        }
     } else {
-        echo 'Error: ' . $insert_sql->error;
+        error_log('Error inserting applicant data: ' . $insert_sql->error);
+        echo 'Error inserting applicant data: ' . $insert_sql->error;
     }
 }
