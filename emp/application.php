@@ -199,10 +199,13 @@ require "handlers/logged_info.php";
                                 </tr>
                             </thead>
                             <?php
-                            $newApp = $conn->prepare("SELECT ja.*, a.*, j.* FROM job_applicants ja JOIN applicants a ON ja.applied_applicant_id = a.applicant_id JOIN jobs j ON ja.applied_job_id = j.job_id ORDER BY ja.applied_date DESC");
+                            $newApp = $conn->prepare("SELECT ja.*, a.*, j.*, s.* FROM job_applicants ja 
+                                JOIN applicants a ON ja.applied_applicant_id = a.applicant_id 
+                                JOIN jobs j ON ja.applied_job_id = j.job_id 
+                                LEFT JOIN schedules s ON ja.applied_id = s.schedule_applied_id ORDER BY 
+                                IF(s.schedule_applied_id IS NOT NULL, 1, 0), j.job_id, ja.applied_ratings DESC");
                             $newApp->execute();
                             $new_result = $newApp->get_result();
-
                             $newCount = 1;
                             $newlys = [];
                             while ($new_rows = $new_result->fetch_assoc()) {
@@ -306,8 +309,6 @@ require "handlers/logged_info.php";
             <p id="applicantResumePoints">Resume Points: Loading...</p>
             <p id="applicantPersonalDataSheetPoints">Personal Data Sheet Points: Loading...</p>
             <p id="applicantPerformanceRatingSheetPoints">Performance Rating Sheet Points: Loading...</p>
-            <p id="applicantCertificateOfEligibilityPoints">Certificate of Eligibility Points: Loading...</p>
-            <p id="applicantTrainingCertificatePoints">Training Certificate Points: Loading...</p>
             <p id="applicantTranscriptOfRecordsPoints">Transcript of Records Points: Loading...</p>
             <p id="applicantQualificationScore">Qualification Score: Loading...</p>
         </div>
@@ -319,11 +320,9 @@ require "handlers/logged_info.php";
         <div style="font-size: 14px; line-height: 1.6; margin-top: 10px">
             <strong>The scoring is based on the following weights:</strong>
             <ul style="margin-top: 5px;">
-                <li><span>Resume:</span> <strong class="weight">30%</strong></li>
+                <li><span>Resume:</span> <strong class="weight">65%</strong></li>
                 <li><span>Personal Data Sheet:</span> <strong class="weight">10%</strong></li>
                 <li><span>Performance Rating Sheet:</span> <strong class="weight">15%</strong></li>
-                <li><span>Certificate of Eligibility:</span> <strong class="weight">20%</strong></li>
-                <li><span>Training Certificate:</span> <strong class="weight">15%</strong></li>
                 <li><span>Transcript of Records:</span> <strong class="weight">10%</strong></li>
             </ul>
             <br>
@@ -404,24 +403,18 @@ require "handlers/logged_info.php";
         });
 
         function openScoreModal(appliedId) {
-            // Open the modal
             document.getElementById('scoreModal').style.display = 'block';
 
-            // Fetch the scores using appliedId
             fetch(`handlers/applicant/get_scores.php?applied_id=${appliedId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data) {
-                        // Populate modal with data
-                        document.getElementById('applicantResumePoints').textContent = 'Resume Points: ' + (data.resume_points || 'Not available');
-                        document.getElementById('applicantPersonalDataSheetPoints').textContent = 'Personal Data Sheet Points: ' + (data.personal_data_sheet_points || 'Not available');
-                        document.getElementById('applicantPerformanceRatingSheetPoints').textContent = 'Performance Rating Sheet Points: ' + (data.performance_rating_sheet_points || 'Not available');
-                        document.getElementById('applicantCertificateOfEligibilityPoints').textContent = 'Certificate of Eligibility Points: ' + (data.certificate_of_eligibility_points || 'Not available');
-                        document.getElementById('applicantTrainingCertificatePoints').textContent = 'Training Certificate Points: ' + (data.training_certificate_points || 'Not available');
-                        document.getElementById('applicantTranscriptOfRecordsPoints').textContent = 'Transcript of Records Points: ' + (data.transcript_of_records_points || 'Not available');
-                        document.getElementById('applicantQualificationScore').textContent = 'Qualification Score: ' + (data.qualification_score || 'Not available');
+                        document.getElementById('applicantResumePoints').textContent = 'Resume Points: ' + (data.resume_points || '0');
+                        document.getElementById('applicantPersonalDataSheetPoints').textContent = 'Personal Data Sheet Points: ' + (data.personal_data_sheet_points || '0');
+                        document.getElementById('applicantPerformanceRatingSheetPoints').textContent = 'Performance Rating Sheet Points: ' + (data.performance_rating_sheet_points || '0');
+                        document.getElementById('applicantTranscriptOfRecordsPoints').textContent = 'Transcript of Records Points: ' + (data.transcript_of_records_points || '0');
+                        document.getElementById('applicantQualificationScore').textContent = 'Qualification Score: ' + (data.qualification_score || '0');
                     } else {
-                        // If no data is found, show an error message
                         document.getElementById('applicantQualificationScore').textContent = 'Error loading scores.';
                     }
                 })
@@ -431,36 +424,29 @@ require "handlers/logged_info.php";
                 });
         }
 
-        // Close the modal when the close button is clicked
         document.getElementById('closeModal').onclick = function() {
             document.getElementById('scoreModal').style.display = 'none';
         }
 
-        // Close the modal when clicking outside of it
         window.onclick = function(event) {
             if (event.target == document.getElementById('scoreModal')) {
                 document.getElementById('scoreModal').style.display = 'none';
             }
         }
 
-        // Get elements
         const popover = document.getElementById('popover');
         const popoverBtn = document.getElementById('popover-btn');
 
-        // Show popover when button is clicked
         popoverBtn.addEventListener('click', function() {
-            // Toggle visibility
             popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
         });
 
-        // Hide popover when clicked outside
         document.addEventListener('click', function(event) {
             if (!popover.contains(event.target) && event.target !== popoverBtn) {
                 popover.style.display = 'none';
             }
         });
 
-        // Optionally, show popover on hover (if needed)
         popoverBtn.addEventListener('mouseover', function() {
             popover.style.display = 'block';
         });

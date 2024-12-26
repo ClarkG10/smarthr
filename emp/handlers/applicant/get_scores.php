@@ -11,11 +11,8 @@ if (!is_numeric($applied_id)) {
     exit;
 }
 
-// Query to fetch the score details from applicant_scores table
 $query = "
-    SELECT resume_points, personal_data_sheet_points, performance_rating_sheet_points, 
-           certificate_of_eligibility_points, training_certificate_points, transcript_of_records_points, 
-           qualification_score 
+    SELECT resume_points, personal_data_sheet_points, performance_rating_sheet_points, transcript_of_records_points, qualification_score 
     FROM applicant_scores 
     WHERE applied_id = ?
 ";
@@ -33,8 +30,6 @@ $stmt->bind_result(
     $resume_points,
     $personal_data_sheet_points,
     $performance_rating_sheet_points,
-    $certificate_of_eligibility_points,
-    $training_certificate_points,
     $transcript_of_records_points,
     $qualification_score
 );
@@ -50,8 +45,6 @@ echo json_encode([
     'resume_points' => $resume_points,
     'personal_data_sheet_points' => $personal_data_sheet_points,
     'performance_rating_sheet_points' => $performance_rating_sheet_points,
-    'certificate_of_eligibility_points' => $certificate_of_eligibility_points,
-    'training_certificate_points' => $training_certificate_points,
     'transcript_of_records_points' => $transcript_of_records_points,
     'qualification_score' => $qualification_score
 ]);

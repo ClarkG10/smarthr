@@ -5,7 +5,8 @@ require "authenticate.php";
 require "user_logged.php";
 
 // dependencies for parsing PDFs and DOCX files
-require 'D:/laragon/www/smarthr/vendor/autoload.php'; // e change ni depende saimong path 
+// require 'D:/laragon/www/smarthr/vendor/autoload.php'; // e change ni depende saimong path 
+require '../../vendor/autoload.php';
 
 use PhpOffice\PhpWord\IOFactory;
 use Smalot\PdfParser\Parser;
@@ -105,34 +106,44 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $parser = new Parser();
             try {
                 $pdf = $parser->parseFile($filePath);
-                $text = $pdf->getText(); // kay okay mani 
+                $text = $pdf->getText();
 
                 // Sanitize and escape the text for use in JavaScript
                 $jsonText = json_encode($text);
-                echo "<script>console.log('Parsed PDF Text: " . $jsonText . "');</script>"; // Output to browser console e comment lang for debugging rani
+                echo "<script>console.log('Parsed PDF Text: " . $jsonText . "');</script>";
             } catch (Exception $e) {
                 error_log('Error parsing PDF: ' . $e->getMessage());
             }
         } elseif ($fileExtension == "docx" || $fileExtension == "doc") {
             try {
-                $phpWord = IOFactory::load($filePath);
+                $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
                 foreach ($phpWord->getSections() as $section) {
                     foreach ($section->getElements() as $element) {
-                        if (method_exists($element, 'getText')) {
-                            $text .= $element->getText() . "\n"; //ayaw e mind okay rana
-                        } elseif ($element instanceof \PhpOffice\PhpWord\Element\TextRun) {
+                        // Check if the element is a Text element
+                        if ($element instanceof \PhpOffice\PhpWord\Element\Text) {
+                            $text .= $element->getText() . "\n";
+                        }
+                        // handle multiple text elements. if daghay text element kani ang e run
+                        elseif ($element instanceof \PhpOffice\PhpWord\Element\TextRun) {
+                            // for each text element sa group of element which also called textRun 
+                            // iyang e loop
                             foreach ($element->getElements() as $subElement) {
-                                if (method_exists($subElement, 'getText')) {
-                                    $text .= $subElement->getText(); //ayaw e mind okay rana
+                                // subElement is mao naning text element and ang e consider nga text element is 
+                                // before magka new line 
+                                if ($subElement instanceof \PhpOffice\PhpWord\Element\Text) {
+                                    // echo "<script>console.log(' subElement Parsed DOCX Text: " . $subElement->getText() . "');</script>";
+                                    $text .= $subElement->getText();
                                 }
                             }
+                            // after each text element mag add tag new line
+                            $text .= "\n";
                         }
                     }
                 }
 
                 // Sanitize and escape the text for use in JavaScript
                 $jsonText = json_encode($text);
-                echo "<script>console.log('Parsed DOCX Text: " . $jsonText . "');</script>"; // Output to browser console e comment lang for debugging rani
+                echo "<script>console.log('Parsed DOCX Text: " . $jsonText . "');</script>";
             } catch (Exception $e) {
                 error_log('Error parsing DOC/DOCX: ' . $e->getMessage());
             }
@@ -141,13 +152,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         return $text;
     }
 
+
+
     // Function to analyze qualifications using Gemini API
     function analyzeQualificationsWithGemini($education, $program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency)
     {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
         $prompt = "
-        Analyze the qualifications provided and return a score between 0 and 100 with decimals based on relevance to the water district job position: '$jobPosition'.
+        Analyze the qualifications provided and return a score between 0 and 100 based on relevance to the water district job position: '$jobPosition'.
         
         The minimum requirements for this position are as follows:
         - Education: $jobMinimumEducation
@@ -166,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         
         Please assess the applicant's qualifications against these requirements.
         
-        Return the score only. If the qualifications do not meet the minimum requirements or are irrelevant, return an approriate score. No additional text or explanation is required.";
+        Return the score only. If the qualifications do not meet the minimum requirements or are irrelevant, return an precise and appropriate score. No additional text or explanation is required.";
 
         $data = [
             'contents' => [
@@ -188,6 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
         $response = curl_exec($ch);
+
         if ($response === false) {
             error_log('Curl error: ' . curl_error($ch));
             curl_close($ch);
@@ -211,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
         $prompt = "
-        Analyze the following document text and return a score between 0 and 100 with decimals based on its relevance to the water district job position: '$jobPosition'.
+        Analyze the following document text and return a score between 0 and 100 based on its relevance to the water district job position: '$jobPosition'.
         
         Please pay special attention to the document type: $fileType. It is crucial that you accurately assess the content and format of the document based on the following job requirements and expectations:
         
@@ -221,15 +235,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         4. Certificate of Eligibility: Ensure the eligibility criteria are met and appropriately verified.
         5. Training Certificate: Assess whether the training aligns with the job requirements.
         6. Transcript of Records: Evaluate if the educational qualifications meet the standards for the job.
-    
+
         If the document is invalid, irrelevant, or does not meet the expected content for the specified document type, please return a score of **0**. 
         
         Here is the applicant's document:
     
         $documentText
-    
-        Please provide the score only, without any additional text or explanation. If the document is deemed irrelevant or incorrect, return a score of 0.";
 
+        Once you have reviewed the document, Please provide the score only for the specified document type. Please pay special attention to the document type: $fileType. If the document is deemed incorrect, please return a score of 0.";
 
         $data = [
             'contents' => [
@@ -251,6 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
         $response = curl_exec($ch);
+
         if ($response === false) {
             error_log('Curl error: ' . curl_error($ch));
             curl_close($ch);
@@ -261,6 +275,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
         // Get the score
         $decodedResponse = json_decode($response, true);
+
+        $json = json_encode($decodedResponse);
+        echo "<script>console.log('Gemini Response: " . $json . "');</script>";
+
         if (isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
             $score = trim($decodedResponse['candidates'][0]['content']['parts'][0]['text']);
             return (int)$score;
@@ -274,11 +292,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $documentScores = [];
     // overall 100 percent
     $documentWeights = [
-        'resume' => 0.30,  // 30 percent 
+        'resume' => 0.65,  // 65 percent 
         'personal_data_sheet' => 0.10, // 10 percent 
         'performance_rating_sheet' => 0.15, // 15 percent 
-        'certificate_of_eligibility' => 0.20, // 20 percent 
-        'training_certificate' => 0.15, // 15 percent 
         'transcript_of_records' => 0.10, // 10 percent 
     ];
 
@@ -286,8 +302,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         'resume' => $resume_path,
         'personal_data_sheet' => $filepds_path,
         'performance_rating_sheet' => $filerating_path,
-        'certificate_of_eligibility' => $filecertificate_path,
-        'training_certificate' => $filecertificateTraining_path,
         'transcript_of_records' => $filetor_path,
     ];
 
@@ -340,8 +354,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $resume_score = $documentScores['resume'] ?? 0;
         $pds_score = $documentScores['personal_data_sheet'] ?? 0;
         $performance_rating_score = $documentScores['performance_rating_sheet'] ?? 0;
-        $certificate_score = $documentScores['certificate_of_eligibility'] ?? 0;
-        $training_certificate_score = $documentScores['training_certificate'] ?? 0;
         $tor_score = $documentScores['transcript_of_records'] ?? 0;
 
         $insert_scores_sql = $conn->prepare("
@@ -351,22 +363,18 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             `resume_points`, 
             `personal_data_sheet_points`, 
             `performance_rating_sheet_points`, 
-            `certificate_of_eligibility_points`, 
-            `training_certificate_points`, 
             `transcript_of_records_points`, 
             `qualification_score`
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
 
         $insert_scores_sql->bind_param(
-            "iiiiiiiii",
+            "iiiiiii",
             $userId,
             $applied_id,
             $resume_score,
             $pds_score,
             $performance_rating_score,
-            $certificate_score,
-            $training_certificate_score,
             $tor_score,
             $qualificationScore
         );
