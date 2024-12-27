@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $jobMinimumExperience = $_POST['job_minimum_experience'];
     $jobMinimumEligibility = $_POST['job_minimum_eligibility'];
     $jobMinimumCompetency = $_POST['job_minimum_competency'];
+    $jobDescription = $_POST['job_description'];
 
     $jobPositionText = json_encode($jobPosition);
 
@@ -155,12 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
 
     // Function to analyze qualifications using Gemini API
-    function analyzeQualificationsWithGemini($education, $program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency)
+    function analyzeQualificationsWithGemini($education, $program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency, $jobDescription)
     {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
         $prompt = "
-        Analyze the qualifications provided and return a score between 0 and 100 based on relevance to the water district job position: '$jobPosition'.
+        Analyze the qualifications provided and return a score between 0 and 100 with decimals based on relevance to the water district job position: '$jobPosition' - $jobDescription.
         
         The minimum requirements for this position are as follows:
         - Education: $jobMinimumEducation
@@ -179,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         
         Please assess the applicant's qualifications against these requirements.
         
-        Return the score only. If the qualifications do not meet the minimum requirements or are irrelevant, return an precise and appropriate score. No additional text or explanation is required.";
+        Return the score only with decimals. If the qualifications do not meet the minimum requirements or are irrelevant, return an precise and appropriate score. No additional text or explanation is required.";
 
         $data = [
             'contents' => [
@@ -213,19 +214,19 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $decodedResponse = json_decode($response, true);
         if (isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
             $score = trim($decodedResponse['candidates'][0]['content']['parts'][0]['text']);
-            return (int)$score;
+            return (float)$score;
         }
 
         return 0;
     }
 
     // Function to analyze document text using Gemini API
-    function analyzeDocumentWithGemini($documentText, $jobPosition, $fileType)
+    function analyzeDocumentWithGemini($documentText, $jobPosition, $fileType, $jobDescription)
     {
         $apiKey = 'AIzaSyACF3a4t3vX7gl4x2VjPS1izRDcl09BzYk';
 
         $prompt = "
-        Analyze the following document text and return a score between 0 and 100 based on its relevance to the water district job position: '$jobPosition'.
+        Analyze the following document text and return a score between 0 and 100 with decimals based on its relevance to the water district job position: '$jobPosition' - $jobDescription.
         
         Please pay special attention to the document type: $fileType. It is crucial that you accurately assess the content and format of the document based on the following job requirements and expectations:
         
@@ -242,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     
         $documentText
 
-        Once you have reviewed the document, Please provide the score only for the specified document type. Please pay special attention to the document type: $fileType. If the document is deemed incorrect, please return a score of 0.";
+        Once you have reviewed the document, Please provide the score only with decimals for the specified document type. Please pay special attention to the document type: $fileType. If the document is deemed incorrect, please return a score of 0.";
 
         $data = [
             'contents' => [
@@ -281,7 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
         if (isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
             $score = trim($decodedResponse['candidates'][0]['content']['parts'][0]['text']);
-            return (int)$score;
+            return (float)$score;
         }
 
         return 0;
@@ -314,10 +315,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $parsedText = parseFileToText($upload_dir . $file);
             $documentText .= $parsedText . "\n";
 
-            $documentScore = analyzeDocumentWithGemini($parsedText, $jobPosition, $jsonFileType);
+            $documentScore = analyzeDocumentWithGemini($parsedText, $jobPosition, $jsonFileType, $jobDescription);
 
             // Apply the weight for the document type
-            $weightedScore = intval($documentScore) * floatval($documentWeights[$fileType]);
+            $weightedScore = floatval($documentScore) * floatval($documentWeights[$fileType]);
             $documentsPoints += $weightedScore;
 
             // Store the score for this file type
@@ -329,12 +330,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
     }
 
-
     // update program 
     $final_program = $program === 'Others' ? $other_program : $program;
 
     // Get the qualifications score
-    $qualificationScore = analyzeQualificationsWithGemini($education, $final_program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency);
+    $qualificationScore = analyzeQualificationsWithGemini($education, $final_program, $training, $experience, $eligibility, $competency, $jobPosition, $jobMinimumEducation, $jobMinimumTraining, $jobMinimumExperience, $jobMinimumEligibility, $jobMinimumCompetency, $jobDescription);
 
     $jsonScore = json_encode($qualificationScore);
     echo "<script>console.log('Qualification score : " . $jsonScore . "');</script>"; // for debugging
@@ -346,15 +346,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
     // Bind parameters to the SQL query
-    $insert_sql->bind_param("iisssssssssssssssssssi", $userId, $applied_job_id, $street, $city, $province, $zip_code, $status, $home_phone, $facebook_profile, $education, $final_program, $training, $experience, $eligibility, $competency, $resume_path, $filepds_path, $filerating_path, $filecertificate_path, $filecertificateTraining_path, $filetor_path, $finalRating);
+    $insert_sql->bind_param("iisssssssssssssssssssd", $userId, $applied_job_id, $street, $city, $province, $zip_code, $status, $home_phone, $facebook_profile, $education, $final_program, $training, $experience, $eligibility, $competency, $resume_path, $filepds_path, $filerating_path, $filecertificate_path, $filecertificateTraining_path, $filetor_path, $finalRating);
 
     if ($insert_sql->execute()) {
 
         $applied_id = $conn->insert_id;
-        $resume_score = $documentScores['resume'] ?? 0;
-        $pds_score = $documentScores['personal_data_sheet'] ?? 0;
-        $performance_rating_score = $documentScores['performance_rating_sheet'] ?? 0;
-        $tor_score = $documentScores['transcript_of_records'] ?? 0;
+        $resume_score = $documentScores['resume'] ?? 0.00;
+        $pds_score = $documentScores['personal_data_sheet'] ?? 0.00;
+        $performance_rating_score = $documentScores['performance_rating_sheet'] ?? 0.00;
+        $tor_score = $documentScores['transcript_of_records'] ?? 0.00;
 
         $insert_scores_sql = $conn->prepare("
         INSERT INTO `applicant_scores` (
@@ -369,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         ");
 
         $insert_scores_sql->bind_param(
-            "iiiiiii",
+            "iiddddd",
             $userId,
             $applied_id,
             $resume_score,

@@ -76,6 +76,11 @@
                         <option value="Closed" <?php echo ($job['status'] === 'Closed') ? 'selected' : ''; ?>>Closed</option>
                     </select>
                 </div>
+                <div class="update-input">
+                    <label for="place">Job Description:</label>
+                    <textarea type="text" id="jobDescription" style="padding-left: 5px;" rows="5" name="jobDescription" placeholder="Input job description" autocomplete="off"><?php echo htmlspecialchars($job['job_description']) ?></textarea>
+                </div>
+
                 <div class="update-buttons">
                     <input type="submit" name="add_account" value="UPDATE JOB" style="background-color: blue">
                     <button type="button" style="background-color: red" onclick="closeUpdateModal(<?php echo htmlspecialchars($job['job_id']) ?>)">CANCEL</button>

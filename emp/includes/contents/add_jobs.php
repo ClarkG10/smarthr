@@ -1,5 +1,5 @@
 <div class="add-modal" id="addJobModal">
-    <div class="add-content" id="addJobBg">
+    <div class="add-content" id="addJobBg" style="height: fit-content !important;">
         <div class="add-header">
             <h4>ADD AN JOB</h4>
         </div>
@@ -67,8 +67,12 @@
                         <input type="number" id="openPosition" name="openPosition" required autocomplete="off">
                     </div>
                 </div>
+                <div class="add-input">
+                    <label for="place">Job Description:</label>
+                    <textarea type="text" style="padding-left: 5px;" id="jobDescription" rows="5" name="jobDescription" placeholder="Input job description" required autocomplete="off"></textarea>
+                </div>
 
-                <div class="add-buttons">
+                <div class="add-buttons" style="margin-bottom: 10px;">
                     <input type="submit" name="add_account" value="ADD JOB" style="background-color: blue">
                     <button type="button" style="background-color: red" onclick="closeAddJobModal()">CANCEL</button>
                 </div>

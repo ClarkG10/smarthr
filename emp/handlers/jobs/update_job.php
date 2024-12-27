@@ -15,11 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $place = $_POST['update_place'];
     $openPosition = intval($_POST['update_openPosition']) < 0 ? 0 : $_POST['update_openPosition'];
     $update_job_id = $_POST['update_job_id'];
+    $jobDescription = $_POST['jobDescription'];
     $status = intval($openPosition) <= 0 ? 'Closed' : $_POST['update_status'];
 
     $update_sql = $conn->prepare("UPDATE `jobs` SET `job_position`= ?,`plantilla_item`= ?,`pay_grade`= ?,`monthly_salary`= ?,`education`= ?,`training`= ?,
-    `experience`= ?,`eligibility`= ?,`competency`= ?,`open_position`= ?,`place`= ?, `status` = ? WHERE `job_id` = ?");
-    $update_sql->bind_param("siisssssssssi", $jobPosition, $plantillaItem, $payGrade, $monthlySalary, $education, $training, $experience, $eligibility, $competency, $openPosition, $place, $status, $update_job_id);
+    `experience`= ?,`eligibility`= ?,`competency`= ?,`open_position`= ?,`place`= ?, `status` = ?, `job_description` = ? WHERE `job_id` = ?");
+    $update_sql->bind_param("siissssssssssi", $jobPosition, $plantillaItem, $payGrade, $monthlySalary, $education, $training, $experience, $eligibility, $competency, $openPosition, $place, $status, $jobDescription, $update_job_id,);
     if ($update_sql->execute()) {
         echo '<script> alert("Successfully Updated Job."); location.href = "../../manage_jobs.php"; </script>';
         exit();

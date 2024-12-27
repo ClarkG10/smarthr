@@ -195,6 +195,14 @@ require "handlers/logged_info.php";
                                                 </div>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="td">
+                                                    <textarea type="text" value="" rows="5" readonly><?php echo htmlspecialchars($applicationData['job_description']) ?></textarea>
+                                                    <p>Job Description</p>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>

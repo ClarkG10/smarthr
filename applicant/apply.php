@@ -54,6 +54,7 @@ require "handlers/user_logged.php";
                         <input type="hidden" name="job_minimum_experience" value="<?php echo htmlspecialchars($jobInfo['experience']) ?>">
                         <input type="hidden" name="job_minimum_eligibility" value="<?php echo htmlspecialchars($jobInfo['eligibility']) ?>">
                         <input type="hidden" name="job_minimum_competency" value="<?php echo htmlspecialchars($jobInfo['competency']) ?>">
+                        <input type="hidden" name="job_description" value="<?php echo htmlspecialchars($jobInfo['job_description']) ?>">
                         <div class="head-form">
                             <h2>Application Form</h2>
                             <span>Please complete this document</span>
@@ -208,6 +209,14 @@ require "handlers/user_logged.php";
                                                 <div class="td not-allowed">
                                                     <input type="text" value="" class="not-allowed" readonly>
                                                     <p>Closing Date</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="td not-allowed">
+                                                    <textarea type="text" value="" rows="5" class="not-allowed" readonly><?php echo htmlspecialchars($jobInfo['job_description']) ?></textarea>
+                                                    <p>Job Description</p>
                                                 </div>
                                             </td>
                                         </tr>
