@@ -1,5 +1,5 @@
 <div class="update-modal" id="updateJob<?php echo htmlspecialchars($job['job_id']) ?>">
-    <div class="update-content" style="height: fit-content !important; padding-bottom: 20px;" id="addJobBg">
+    <div class="update-content" style="height: fit-content !important; padding-bottom: 20px; max-width: 600px" id="addJobBg">
         <div class="update-header">
             <h4>UPDATE AN JOB</h4>
         </div>
@@ -59,6 +59,22 @@
                 </div>
                 <div class="update-row">
                     <div class="update-input">
+                        <label for="job_skills">Skills Needed:</label>
+                        <input type="text" id="job_skills" name="job_skills" value="<?php echo htmlspecialchars($job['job_skills']); ?>" required autocomplete="off">
+                    </div>
+
+                    <div class="update-input">
+                        <label for="job_type">Type of job:</label>
+                        <select id="job_type" name="job_type" required autocomplete="off " style="font-size: 12px !important; padding: 5px">
+                            <option value="Full-time" <?php echo ($job['job_type'] === 'Full-time') ? 'selected' : ''; ?>>Full-time</option>
+                            <option value="Part-time" <?php echo ($job['job_type'] === 'Part-time') ? 'selected' : ''; ?>>Part-time</option>
+                            <option value="Contract" <?php echo ($job['job_type'] === 'Contract') ? 'selected' : ''; ?>>Contract</option>
+                            <option value="Internship" <?php echo ($job['job_type'] === 'Internship') ? 'selected' : ''; ?>>Internship</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="update-row">
+                    <div class="update-input">
                         <p>Place:</p>
                         <input type="text" name="update_place" value="<?php echo htmlspecialchars($job['place']) ?>" required autocomplete="off">
                     </div>
@@ -78,7 +94,7 @@
                 </div>
                 <div class="update-input">
                     <label for="place">Job Description:</label>
-                    <textarea type="text" id="jobDescription" style="padding-left: 5px;" rows="5" name="jobDescription" placeholder="Input job description" autocomplete="off"><?php echo htmlspecialchars($job['job_description']) ?></textarea>
+                    <textarea type="text" id="jobDescription" style="padding-left: 5px;" rows="3" name="jobDescription" placeholder="Input job description" autocomplete="off"><?php echo htmlspecialchars($job['job_description']) ?></textarea>
                 </div>
 
                 <div class="update-buttons">

@@ -1,7 +1,7 @@
 <div class="add-modal" id="addJobModal">
-    <div class="add-content" id="addJobBg" style="height: fit-content !important;">
+    <div class="add-content" id="addJobBg" style="height: fit-content !important; max-width: 500px">
         <div class="add-header">
-            <h4>ADD AN JOB</h4>
+            <h4>ADD A JOB</h4>
         </div>
         <div class="add-body">
             <form action="handlers/jobs/add_job.php" method="POST" class="addForm">
@@ -58,6 +58,22 @@
                 </div>
                 <div class="add-row">
                     <div class="add-input">
+                        <label for="place">Skills Needed:</label>
+                        <input type="text" id="job_skills" name="job_skills" required autocomplete="off">
+                    </div>
+
+                    <div class="add-input">
+                        <label for="job_type">Type of job:</label>
+                        <select id="job_type" name="job_type" required autocomplete="off" style="font-size: 12px !important; padding: 5px">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="add-row">
+                    <div class="add-input">
                         <label for="place">Place:</label>
                         <input type="text" id="place" name="place" required autocomplete="off">
                     </div>
@@ -67,6 +83,7 @@
                         <input type="number" id="openPosition" name="openPosition" required autocomplete="off">
                     </div>
                 </div>
+
                 <div class="add-input">
                     <label for="place">Job Description:</label>
                     <textarea type="text" style="padding-left: 5px;" id="jobDescription" rows="5" name="jobDescription" placeholder="Input job description" required autocomplete="off"></textarea>

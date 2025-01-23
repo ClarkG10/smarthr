@@ -154,7 +154,7 @@ require "handlers/logged_info.php";
                                         </tr>
 
                                         <div class="sched-modal" id="schedModal<?php echo htmlspecialchars($new['schedule_id']) ?>">
-                                            <div class="sched-content">
+                                            <div class="sched-content" style="height: fit-content;">
                                                 <div class="sched-header">
                                                     <h5>RE-SCHEDULE</h5>
                                                 </div>
@@ -168,6 +168,13 @@ require "handlers/logged_info.php";
                                                         <div class="sched-input">
                                                             <p>Schedule Date</p>
                                                             <input type="time" name="schedule_time" id="" required>
+                                                        </div>
+                                                        <div class="sched-input">
+                                                            <p>Schedule Period</p>
+                                                            <select name="schedule_period" id="" required>
+                                                                <option value="AM" selected>AM</option>
+                                                                <option value="PM">PM</option>
+                                                            </select>
                                                         </div>
                                                         <div class="sched-input-btn">
                                                             <input type="submit" name="submit_sched" value="SCHEDULE" style="background-color: blue">

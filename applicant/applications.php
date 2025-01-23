@@ -111,7 +111,8 @@ require "handlers/user_logged.php";
                                     <th>Job Position</th>
                                     <th>Work Place</th>
                                     <th style="width: 10%">Applied Date</th>
-                                    <th style="width: 10%">Ratings</th>
+                                    <th style="width: 10%">Partial Rating</th>
+                                    <th style="width: 10%">Final Rating</th>
                                     <th style="width: 10%">View Details</th>
                                     <th>Status</th>
                                     <th style="width: 10%">Action</th>
@@ -136,6 +137,7 @@ require "handlers/user_logged.php";
                                             <td><?php echo htmlspecialchars($application['job_position']) ?></td>
                                             <td><?php echo htmlspecialchars($application['place']) ?></td>
                                             <td><?php echo htmlspecialchars($application['applied_date']) ?></td>
+                                            <td><?php echo htmlspecialchars($application['partial_rating']) ?></td>
                                             <td><?php echo htmlspecialchars($application['applied_ratings']) ?></td>
                                             <td><a href="http://localhost/smarthr/applicant/view_details.php?application=<?php echo htmlspecialchars($application['applied_id']) ?>">View Details</a></td>
                                             <td><?php echo htmlspecialchars($application['sched_status']) ?> for Interview</td>

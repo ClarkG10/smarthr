@@ -54,6 +54,7 @@ require "handlers/user_logged.php";
                         <input type="hidden" name="job_minimum_experience" value="<?php echo htmlspecialchars($jobInfo['experience']) ?>">
                         <input type="hidden" name="job_minimum_eligibility" value="<?php echo htmlspecialchars($jobInfo['eligibility']) ?>">
                         <input type="hidden" name="job_minimum_competency" value="<?php echo htmlspecialchars($jobInfo['competency']) ?>">
+                        <input type="hidden" name="job_minimum_skills" value="<?php echo htmlspecialchars($jobInfo['job_skills']) ?>">
                         <input type="hidden" name="job_description" value="<?php echo htmlspecialchars($jobInfo['job_description']) ?>">
                         <div class="head-form">
                             <h2>Application Form</h2>
@@ -248,7 +249,6 @@ require "handlers/user_logged.php";
                                             <td colspan="3">
                                                 <div class="td">
                                                     <select name="program" id="program-options">
-                                                        <!-- Options will be dynamically added here -->
                                                     </select>
                                                     <input
                                                         type="text"
@@ -274,12 +274,26 @@ require "handlers/user_logged.php";
                                                 <div class="td">
                                                     <select name="experience" required>
                                                         <option value="" selected disabled>Select Years of Experience</option>
-                                                        <option value="1">1 year</option>
-                                                        <option value="3">3 years</option>
-                                                        <option value="5">5 years</option>
-                                                        <option value="10">10+ years</option>
+                                                        <option value="Less than 1 year">Less than 1 year</option>
+                                                        <option value="1 year">1 year</option>
+                                                        <option value="2 years">2 years</option>
+                                                        <option value="3 years">3 years</option>
+                                                        <option value="4 years">4 years</option>
+                                                        <option value="5 years">5 years</option>
+                                                        <option value="6-9 years">6-9 years</option>
+                                                        <option value="10 years">10+ years</option>
+                                                        <option value="15 years">15+ years</option>
+                                                        <option value="20 years">20+ years</option>
                                                     </select>
                                                     <p>Experience</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="td">
+                                                    <input type="text" name="skills" placeholder="Enter skills" autocomplete="off">
+                                                    <p>Skills</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -292,7 +306,8 @@ require "handlers/user_logged.php";
                                             </td>
                                             <td style="width: 25%;">
                                                 <div class="td">
-                                                    <input type="file" id="file-certificate" name="file-certificate" accept=".pdf,.docx">
+                                                    <!-- Allow multiple files -->
+                                                    <input type="file" id="file-certificate" name="file-certificate[]" accept=".pdf,.docx" multiple>
                                                     <p>Certificate of Eligibility/Rating/License : (optional) :</p>
                                                 </div>
                                             </td>
@@ -306,12 +321,12 @@ require "handlers/user_logged.php";
                                             </td>
                                             <td style="width: 25%;">
                                                 <div class="td">
-                                                    <input type="file" id="file-certificate-traning" name="file-certificate-training" accept=".pdf,.docx">
+                                                    <!-- Allow multiple files -->
+                                                    <input type="file" id="file-certificate-training" name="file-certificate-training[]" accept=".pdf,.docx" multiple>
                                                     <p>Provide Certificate of the training : (optional) :</p>
                                                 </div>
                                             </td>
                                         </tr>
-
                                     </table>
                                 </div>
                             </div>

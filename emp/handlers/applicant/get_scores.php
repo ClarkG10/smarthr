@@ -12,7 +12,7 @@ if (!is_numeric($applied_id)) {
 }
 
 $query = "
-    SELECT resume_points, personal_data_sheet_points, performance_rating_sheet_points, transcript_of_records_points, qualification_score 
+    SELECT resume_points, education_points, training_points, experience_points, eligibility_points, competency_points, skill_points 
     FROM applicant_scores 
     WHERE applied_id = ?
 ";
@@ -28,10 +28,12 @@ $stmt->bind_param("i", $applied_id); // Bind the parameter
 $stmt->execute();
 $stmt->bind_result(
     $resume_points,
-    $personal_data_sheet_points,
-    $performance_rating_sheet_points,
-    $transcript_of_records_points,
-    $qualification_score
+    $education_points,
+    $training_points,
+    $experience_points,
+    $eligibility_points,
+    $competency_points,
+    $skill_points,
 );
 $stmt->fetch();
 
@@ -40,13 +42,17 @@ if ($stmt->error) {
     exit;
 }
 
+
+
 // Return the score details as JSON
 echo json_encode([
     'resume_points' => $resume_points,
-    'personal_data_sheet_points' => $personal_data_sheet_points,
-    'performance_rating_sheet_points' => $performance_rating_sheet_points,
-    'transcript_of_records_points' => $transcript_of_records_points,
-    'qualification_score' => $qualification_score
+    'education_points' => $education_points,
+    'training_points' => $training_points,
+    'experience_points' => $experience_points,
+    'eligibility_points' => $eligibility_points,
+    'competency_points' => $competency_points,
+    'skill_points' => $skill_points,
 ]);
 
 $stmt->close();

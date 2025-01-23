@@ -26,25 +26,121 @@ require "handlers/logged_info.php";
     <?php include "includes/navigation.php" ?>
     <main>
         <section>
+            <div style="display: flex; justify-content: end; align-items: center; padding: 10px;">
+                <!-- Button to trigger modal -->
+                <button type="button" style="color: white; background-color: blue; padding: 5px; border-radius: 5px; border: none" id="updateScoresBtn">Update Scores</button>
+            </div>
             <div class="apply">
                 <?php
                 if (isset($_GET['application'])) {
                     $application_id = $_GET['application'];
 
-                    $fetch_application = $conn->prepare("SELECT ja.*, a.*, j.* FROM job_applicants ja JOIN applicants a ON ja.applied_applicant_id = a.applicant_id JOIN jobs j ON ja.applied_job_id = j.job_id WHERE ja.applied_id = $application_id");
+                    // Fetch application and applicant details
+                    $fetch_application = $conn->prepare("SELECT ja.*, a.*, j.*, ascores.* FROM job_applicants ja 
+                                              JOIN applicants a ON ja.applied_applicant_id = a.applicant_id 
+                                              JOIN jobs j ON ja.applied_job_id = j.job_id
+                                              LEFT JOIN applicant_scores ascores ON ascores.applied_id = ja.applied_id
+                                              WHERE ja.applied_id = ?");
+                    $fetch_application->bind_param("i", $application_id);
                     $fetch_application->execute();
                     $fetch_res = $fetch_application->get_result();
+
                     if ($fetch_res->num_rows === 1) {
                         $applicationData = $fetch_res->fetch_assoc();
                     }
                 }
                 ?>
+
+                <div id="updateScoresModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; width: 80%; max-width: 400px; position: relative;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <h3>Update Scores</h3>
+                            <button onclick="closeModal()" style="background-color: white; font-weight: 700; border: none; padding: 5px; border-radius: 5px">X</button>
+                        </div>
+                        <div style="margin-bottom: 10px; display: flex; justify-content: end;">
+                            <button type="button" onclick="toggleMaxScores()" style="background-color: lightgray; border: none; padding: 5px; border-radius: 5px;">Show Max Scores and Formula</button>
+                        </div>
+                        <form action="handlers/applicant/update_scores.php" method="POST" onsubmit="return validateScores()">
+                            <input type="hidden" name="applied_id" value="<?php echo htmlspecialchars($applicationData['applied_id']) ?>">
+
+                            <div>
+                                <label for="resume_points">Resume Points:</label><br>
+                                <input style="width: 100%" type="number" id="resume_points" name="resume_points" value="<?php echo htmlspecialchars($applicationData['resume_points'] ?? '') ?>" required>
+                            </div>
+                            <div>
+                                <label for="education_points">Education Points:</label><br>
+                                <input style="width: 100%" type="number" id="education_points" name="education_points" value="<?php echo htmlspecialchars($applicationData['education_points'] ?? '') ?>" required>
+                            </div>
+                            <div>
+                                <label for="training_points">Training Points:</label><br>
+                                <input style="width: 100%" type="number" id="training_points" name="training_points" value="<?php echo htmlspecialchars($applicationData['training_points'] ?? '') ?>" required>
+                            </div>
+                            <div>
+                                <label for="experience_points">Experience Points:</label><br>
+                                <input style="width: 100%" type="number" id="experience_points" name="experience_points" value="<?php echo htmlspecialchars($applicationData['experience_points'] ?? '') ?>" required>
+                            </div>
+                            <div>
+                                <label for="eligibility_points">Eligibility Points:</label><br>
+                                <input style="width: 100%" type="number" id="eligibility_points" name="eligibility_points" value="<?php echo htmlspecialchars($applicationData['eligibility_points'] ?? '') ?>" required>
+                            </div>
+                            <div>
+                                <label for="competency_points">Competency Points:</label><br>
+                                <input style="width: 100%" type="number" id="competency_points" name="competency_points" value="<?php echo htmlspecialchars($applicationData['competency_points'] ?? '') ?>" required>
+                            </div>
+                            <div>
+                                <label for="skill_points">Skill Points:</label><br>
+                                <input style="width: 100%" type="number" id="skill_points" name="skill_points" value="<?php echo htmlspecialchars($applicationData['skill_points'] ?? '') ?>" required>
+                            </div>
+                            <br>
+                            <div style="display: flex; justify-content: space-between;">
+                                <div>
+                                    <p for="skill_points">Partial Rating:</p>
+                                    <p><?php echo htmlspecialchars($applicationData['partial_rating'] ?? '') ?></p>
+                                </div>
+                                <div>
+                                    <p for="skill_points">Final Rating:</p>
+                                    <p><?php echo htmlspecialchars($applicationData['applied_ratings'] ?? '') ?></p>
+                                </div>
+                            </div>
+
+                            <div id="maxScoresPopover" style="display: none; background: #f9f9f9; padding: 10px; border: 1px solid #ccc; margin-top: 10px; border-radius: 5px; position: absolute; top: -10px; left: 102%; z-index: 9999; width: 400px;">
+                                <h4>Max Points</h4>
+                                <ul>
+                                    <li>Resume: 100</li>
+                                    <li>Education: 20</li>
+                                    <li>Training: 10</li>
+                                    <li>Experience: 30</li>
+                                    <li>Eligibility: 15</li>
+                                    <li>Competency: 15</li>
+                                    <li>Skills: 10</li>
+                                </ul>
+                                <br>
+                                <h4>Formula</h4>
+                                <p><strong>Partial Rating:</strong> ((Education + Training + Experience + Eligibility + Competency + Skills) / 100) * 50</p>
+                                <p><strong>Resume Points:</strong> (Resume Points / 100) * 50</p>
+                                <p><strong>Final Rating:</strong> Partial Score + Resume Score</p>
+                            </div>
+
+                            <div style="margin-top: 10px; display: flex; justify-content: end;">
+                                <button type="submit" style="background-color: blue; color: white; border: none; padding: 5px; border-radius: 5px;">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+
+
+
                 <div class="form">
                     <form action="handlers/apply_process.php" method="POST" class="inputForm" enctype="multipart/form-data">
                         <input type="hidden" name="applied_job_id" value="<?php echo htmlspecialchars($applicationData['job_id']) ?>">
-                        <div class="head-form">
-                            <h2>Application Form</h2>
-                            <!-- <span>Please complete this document</span> -->
+                        <div style="display: flex; justify-content: space-between; align-items: center">
+                            <div class="head-form">
+                                <h2>Application Form</h2>
+                                <!-- <span>Please complete this document</span> -->
+                            </div>
+
                         </div>
                         <div class="body-form">
                             <div class="item">
@@ -305,10 +401,19 @@ require "handlers/logged_info.php";
                                         <tr style="border-bottom:1px solid rgba(0,0,0,0.5)">
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <?php if (!empty($applicationData['applied_file_certificate'])): ?>
-                                                        <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($applicationData['applied_file_certificate']); ?>" target="_blank">Certificate of Eligibility/Rating/License</a>
+                                                    <?php
+                                                    // Decode the JSON data to an array
+                                                    $certificates = json_decode($applicationData['applied_file_certificate'], true);
+
+                                                    if (!empty($certificates) && is_array($certificates)): ?>
+                                                        Eligibility Certificates:
+                                                        <?php foreach ($certificates as $certificate): ?>
+                                                            <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($certificate); ?>" target="_blank">
+                                                                <?php echo htmlspecialchars(basename($certificate)); ?>
+                                                            </a>
+                                                        <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <span>Eligibility Certificate not available</span>
+                                                        <span>Eligibility Certificates not available</span>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -316,10 +421,19 @@ require "handlers/logged_info.php";
                                         <tr style="border-bottom:1px solid rgba(0,0,0,0.5)">
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <?php if (!empty($applicationData['applied_file_training_cert'])): ?>
-                                                        <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($applicationData['applied_file_training_cert']); ?>" target="_blank">Certificate of Training</a>
+                                                    <?php
+                                                    // Decode the JSON data to an array
+                                                    $trainingCerts = json_decode($applicationData['applied_file_training_cert'], true);
+
+                                                    if (!empty($trainingCerts) && is_array($trainingCerts)): ?>
+                                                        Training Certificates:
+                                                        <?php foreach ($trainingCerts as $trainingCert): ?>
+                                                            <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($trainingCert); ?>" target="_blank">
+                                                                <?php echo htmlspecialchars(basename($trainingCert)); ?>
+                                                            </a>
+                                                        <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <span>Training Certificate not available</span>
+                                                        <span>Training Certificates not available</span>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -394,7 +508,9 @@ require "handlers/logged_info.php";
                 </div>
             </div>
         </section>
+
     </main>
+
 
     <script src="http://localhost/smarthr/emp/js/navigation.js"></script>
     <script>
@@ -404,6 +520,45 @@ require "handlers/logged_info.php";
 
         function closeViewModal(jobId) {
             document.getElementById("viewModal" + jobId).style.display = "none";
+        }
+
+        document.getElementById("updateScoresBtn").addEventListener("click", function() {
+            document.getElementById("updateScoresModal").style.display = "flex";
+        });
+
+        function closeModal() {
+            document.getElementById("updateScoresModal").style.display = "none";
+        }
+
+        function validateScores() {
+            const maxValues = {
+                resume_points: 100,
+                education_points: 20,
+                training_points: 10,
+                experience_points: 30,
+                eligibility_points: 15,
+                competency_points: 15,
+                skill_points: 10,
+            };
+
+            for (const [key, max] of Object.entries(maxValues)) {
+                const input = document.getElementById(key);
+                if (parseFloat(input.value) > max) {
+                    alert(`${key.replace('_', ' ')} cannot exceed ${max}`);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function toggleMaxScores() {
+            const popover = document.getElementById("maxScoresPopover");
+            if (popover.style.display === "none" || popover.style.display === "") {
+                popover.style.display = "block";
+            } else {
+                popover.style.display = "none";
+            }
         }
     </script>
 </body>

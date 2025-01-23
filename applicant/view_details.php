@@ -304,10 +304,19 @@ require "handlers/user_logged.php";
                                         <tr style="border-bottom:1px solid rgba(0,0,0,0.5)">
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <?php if (!empty($applicationData['applied_file_certificate'])): ?>
-                                                        <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($applicationData['applied_file_certificate']); ?>" target="_blank">Certificate of Eligibility/Rating/License</a>
+                                                    <?php
+                                                    // Decode the JSON data to an array
+                                                    $certificates = json_decode($applicationData['applied_file_certificate'], true);
+
+                                                    if (!empty($certificates) && is_array($certificates)): ?>
+                                                        Eligibility Certificates:
+                                                        <?php foreach ($certificates as $certificate): ?>
+                                                            <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($certificate); ?>" target="_blank">
+                                                                <?php echo htmlspecialchars(basename($certificate)); ?>
+                                                            </a>
+                                                        <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <span>Eligibility Certificate not available</span>
+                                                        <span>Eligibility Certificates not available</span>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -315,10 +324,19 @@ require "handlers/user_logged.php";
                                         <tr style="border-bottom:1px solid rgba(0,0,0,0.5)">
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <?php if (!empty($applicationData['applied_file_training_cert'])): ?>
-                                                        <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($applicationData['applied_file_training_cert']); ?>" target="_blank">Certificate of Training</a>
+                                                    <?php
+                                                    // Decode the JSON data to an array
+                                                    $trainingCerts = json_decode($applicationData['applied_file_training_cert'], true);
+
+                                                    if (!empty($trainingCerts) && is_array($trainingCerts)): ?>
+                                                        Training Certificates:
+                                                        <?php foreach ($trainingCerts as $trainingCert): ?>
+                                                            <a href="http://localhost/smarthr/uploads/<?php echo htmlspecialchars($trainingCert); ?>" target="_blank">
+                                                                <?php echo htmlspecialchars(basename($trainingCert)); ?>
+                                                            </a>
+                                                        <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <span>Training Certificate not available</span>
+                                                        <span>Training Certificates not available</span>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>

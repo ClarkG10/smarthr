@@ -16,6 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $openPosition = $_POST['openPosition'];
     $jobDescription = $_POST['jobDescription'];
     $status = "Open";
+    $skills = $_POST['job_skills'];
+    $jobType = $_POST['job_type'];
 
     $check_position = $conn->prepare("SELECT * FROM JOBS WHERE job_position = ?");
     $check_position->bind_param("s", $jobPosition);
@@ -23,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $check_result = $check_position->get_result();
 
     if ($check_result->num_rows === 0) {
-        $insert_sql = $conn->prepare("INSERT INTO `jobs`(`job_position`, `plantilla_item`, `pay_grade`, `monthly_salary`, `education`, `training`, `experience`, `eligibility`, `competency`, `open_position`, `place`, `status`, `job_description`) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $insert_sql->bind_param("siissssssisss", $jobPosition, $plantillaItem, $payGrade, $monthlySalary, $education, $training, $experience, $eligibility, $competency, $openPosition, $place, $status, $jobDescription);
+        $insert_sql = $conn->prepare("INSERT INTO `jobs`(`job_position`, `plantilla_item`, `pay_grade`, `monthly_salary`, `education`, `training`, `experience`, `eligibility`, `competency`, `open_position`, `place`, `status`, `job_description`, `job_skills`, `job_type` ) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $insert_sql->bind_param("siissssssisssss", $jobPosition, $plantillaItem, $payGrade, $monthlySalary, $education, $training, $experience, $eligibility, $competency, $openPosition, $place, $status, $jobDescription, $skills, $jobType);
         if ($insert_sql->execute()) {
             echo '<script> alert("Successfully Added Job."); location.href = "../../manage_jobs.php"; </script>';
             exit();

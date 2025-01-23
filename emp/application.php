@@ -126,7 +126,8 @@ require "handlers/logged_info.php";
                                     <th style="min-width: 150px">Job Position</th>
                                     <th style="width: 10%; min-width: 100px">Applied Date</th>
                                     <th>Status</th>
-                                    <th>Ratings</th>
+                                    <th>Partial Rating</th>
+                                    <th>Final Rating</th>
                                     <th>Program</th>
                                     <th style="width: 10%; min-width: 100px">Details</th>
                                     <th style="width: 10%; min-width: 100px">Scores</th>
@@ -166,6 +167,7 @@ require "handlers/logged_info.php";
                                         </select>
                                     </td>
                                     <td></td>
+                                    <td></td>
                                     <td>
                                         <select name="filter_program" id="filter_program">
                                             <?php
@@ -195,7 +197,6 @@ require "handlers/logged_info.php";
                                     </td>
                                     <td></td>
                                     <td></td>
-                                    <td></td>
                                 </tr>
                             </thead>
                             <?php
@@ -223,6 +224,7 @@ require "handlers/logged_info.php";
                                             <td style="text-transform:uppercase"><?php echo htmlspecialchars($new['job_position']) ?></td>
                                             <td><?php echo htmlspecialchars($new['applied_date']) ?></td>
                                             <td><?php echo htmlspecialchars($new['sched_status']) ?></td>
+                                            <td><?php echo htmlspecialchars($new['partial_rating']) ?></td>
                                             <td><?php echo htmlspecialchars($new['applied_ratings']) ?></td>
                                             <td><?php echo htmlspecialchars($new['applied_program']) ?></td>
                                             <td><a href="view_details.php?application=<?php echo htmlspecialchars($new['applied_id']) ?>">View Details</a></td>
@@ -244,7 +246,7 @@ require "handlers/logged_info.php";
                                         </tr>
 
                                         <div class="sched-modal" id="schedModal<?php echo htmlspecialchars($new['applied_id']) ?>">
-                                            <div class="sched-content">
+                                            <div class="sched-content" style="height: fit-content">
                                                 <div class="sched-header">
                                                     <h5>ADD SCHEDULE</h5>
                                                 </div>
@@ -256,8 +258,15 @@ require "handlers/logged_info.php";
                                                             <input type="date" name="sched_date" id="" required>
                                                         </div>
                                                         <div class="sched-input">
-                                                            <p>Schedule Date</p>
+                                                            <p>Schedule Time</p>
                                                             <input type="time" name="sched_time" id="" required>
+                                                        </div>
+                                                        <div class="sched-input">
+                                                            <p>Schedule Period</p>
+                                                            <select name="sched_period" id="" required>
+                                                                <option value="AM" selected>AM</option>
+                                                                <option value="PM">PM</option>
+                                                            </select>
                                                         </div>
                                                         <div class="sched-input-btn">
                                                             <input type="submit" name="submit_sched" value="SCHEDULE" style="background-color: blue">
@@ -305,12 +314,16 @@ require "handlers/logged_info.php";
     <div id="scoreModal" class="modal1" style="display:none;">
         <div class="modal-content1">
             <span id="closeModal" class="close">&times;</span>
-            <h3 style="margin-bottom: 10px;">Applicant's Scores</h3>
+            <h3 style="margin-bottom: 10px;">Applicant's Points</h3>
+            <p id="educationPoints">Education Points: Loading...</p>
+            <p id="trainingPoints">Training Points: Loading...</p>
+            <p id="experiencePoints">Experience Points: Loading...</p>
+            <p id="eligibilityPoints">Eligibility Points: Loading...</p>
+            <p id="competencyPoints">Competency Points: Loading...</p>
+            <p id="skillsPoints">Skills Points: Loading...</p>
+
             <p id="applicantResumePoints">Resume Points: Loading...</p>
-            <p id="applicantPersonalDataSheetPoints">Personal Data Sheet Points: Loading...</p>
-            <p id="applicantPerformanceRatingSheetPoints">Performance Rating Sheet Points: Loading...</p>
-            <p id="applicantTranscriptOfRecordsPoints">Transcript of Records Points: Loading...</p>
-            <p id="applicantQualificationScore">Qualification Score: Loading...</p>
+
         </div>
     </div>
 
@@ -318,24 +331,21 @@ require "handlers/logged_info.php";
     <div class="popover" id="popover">
         <h3 style="color: #007bff;">Scoring Formula</h3>
         <div style="font-size: 14px; line-height: 1.6; margin-top: 10px">
-            <strong>The scoring is based on the following weights:</strong>
-            <ul style="margin-top: 5px;">
-                <li><span>Resume:</span> <strong class="weight">65%</strong></li>
-                <li><span>Personal Data Sheet:</span> <strong class="weight">10%</strong></li>
-                <li><span>Performance Rating Sheet:</span> <strong class="weight">15%</strong></li>
-                <li><span>Transcript of Records:</span> <strong class="weight">10%</strong></li>
+            <h4>Max Points</h4>
+            <ul>
+                <li>Resume: 100</li>
+                <li>Education: 20</li>
+                <li>Training: 10</li>
+                <li>Experience: 30</li>
+                <li>Eligibility: 15</li>
+                <li>Competency: 15</li>
+                <li>Skills: 10</li>
             </ul>
             <br>
-            <p>
-                Each document’s score is multiplied by the respective weight. The weighted scores are then summed up, and the total is averaged with the qualification score.
-            </p>
-            <br>
-            <strong>Final Score Calculation:</strong>
-            <p>
-                The final score is calculated by averaging the overall document score (out of 100 points) and the qualification score (out of 100 points).
-            </p>
-            <br>
-            <p><strong>Formula:</strong> <code>(Documents Score + Qualification Score) / 2</code></p>
+            <h4>Formula</h4>
+            <p><strong>Partial Rating:</strong> ((Education + Training + Experience + Eligibility + Competency + Skills) / 100) * 50</p>
+            <p><strong>Resume Score:</strong> (Resume Points / 100) * 50</p>
+            <p><strong>Final Rating:</strong> Partial Score + Resume Score</p>
         </div>
     </div>
 
@@ -378,7 +388,7 @@ require "handlers/logged_info.php";
                 const jobPosition = filterRow.children[4].querySelector("select").value.toLowerCase();
                 const appliedDate = filterRow.children[5].querySelector("input[type='date']").value.toLowerCase();
                 const status = filterRow.children[6].querySelector("select").value.toLowerCase();
-                const program = filterRow.children[8].querySelector("select").value.toLowerCase();
+                const program = filterRow.children[9].querySelector("select").value.toLowerCase();
 
                 Array.from(table.rows).forEach(row => {
                     const cells = row.children;
@@ -389,7 +399,7 @@ require "handlers/logged_info.php";
                         matchesFirstLetter(cells[4].textContent.toLowerCase(), jobPosition),
                         matchesFirstLetter(cells[5].textContent.toLowerCase(), appliedDate),
                         matchesFirstLetter(cells[6].textContent.toLowerCase(), status),
-                        matchesFirstLetter(cells[8].textContent.toLowerCase(), program),
+                        matchesFirstLetter(cells[9].textContent.toLowerCase(), program),
                     ];
 
                     row.style.display = matches.every(Boolean) ? "" : "none";
@@ -410,17 +420,19 @@ require "handlers/logged_info.php";
                 .then(data => {
                     if (data) {
                         document.getElementById('applicantResumePoints').textContent = 'Resume Points: ' + (data.resume_points || '0');
-                        document.getElementById('applicantPersonalDataSheetPoints').textContent = 'Personal Data Sheet Points: ' + (data.personal_data_sheet_points || '0');
-                        document.getElementById('applicantPerformanceRatingSheetPoints').textContent = 'Performance Rating Sheet Points: ' + (data.performance_rating_sheet_points || '0');
-                        document.getElementById('applicantTranscriptOfRecordsPoints').textContent = 'Transcript of Records Points: ' + (data.transcript_of_records_points || '0');
-                        document.getElementById('applicantQualificationScore').textContent = 'Qualification Score: ' + (data.qualification_score || '0');
+                        document.getElementById('educationPoints').textContent = 'Education Points: ' + (data.education_points || '0');
+                        document.getElementById('trainingPoints').textContent = 'Training Points: ' + (data.training_points || '0');
+                        document.getElementById('experiencePoints').textContent = 'Experience Points: ' + (data.experience_points || '0');
+                        document.getElementById('eligibilityPoints').textContent = 'Eligibiliity Points: ' + (data.eligibility_points || '0');
+                        document.getElementById('competencyPoints').textContent = 'Competency Points: ' + (data.competency_points || '0');
+                        document.getElementById('skillsPoints').textContent = 'Skills Points: ' + (data.skill_points || '0');
                     } else {
-                        document.getElementById('applicantQualificationScore').textContent = 'Error loading scores.';
+                        document.getElementById('applicantResumePoints').textContent = 'Error loading scores.';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('applicantQualificationScore').textContent = 'Error loading scores.';
+                    document.getElementById('applicantResumePoints').textContent = 'Error loading scores.';
                 });
         }
 

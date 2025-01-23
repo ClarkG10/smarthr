@@ -1,5 +1,5 @@
 <div class="view-modal" id="viewModal<?php echo htmlspecialchars($job['job_id']) ?>">
-    <div class="view-content" style="height: fit-content;">
+    <div class="view-content" style="height: fit-content; max-width: 850px">
         <div class="view-header">
             <h4>JOB DETAILS</h4>
         </div>
@@ -50,6 +50,16 @@
                 <div class="dataInfo">
                     <strong>Place of Work:</strong>
                     <p><?php echo htmlspecialchars($job['place']) ?></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="dataInfo">
+                    <strong>Skills Needed:</strong>
+                    <p><?php echo htmlspecialchars($job['job_skills']) ?></p>
+                </div>
+                <div class="dataInfo">
+                    <strong>Type of Job:</strong>
+                    <p><?php echo htmlspecialchars($job['job_type']) ?></p>
                 </div>
             </div>
             <div class="dataInfo">
