@@ -292,7 +292,36 @@ require "handlers/user_logged.php";
                                         <tr>
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <input type="text" name="skills" placeholder="Enter skills" autocomplete="off">
+                                                    <select name="skills">
+                                                        <option value="Water Treatment">Water Treatment</option>
+                                                        <option value="Water Distribution">Water Distribution</option>
+                                                        <option value="Customer Service">Customer Service</option>
+                                                        <option value="Maintenance and Repair">Maintenance and Repair</option>
+                                                        <option value="Water Conservation">Water Conservation</option>
+                                                        <option value="Quality Control">Quality Control</option>
+                                                        <option value="System Design and Engineering">System Design and Engineering</option>
+                                                        <option value="Regulatory Compliance">Regulatory Compliance</option>
+                                                        <option value="Project Management">Project Management</option>
+                                                        <option value="Financial Management">Financial Management</option>
+                                                        <option value="Supply Chain Management">Supply Chain Management</option>
+                                                        <option value="Risk Management">Risk Management</option>
+                                                        <option value="Infrastructure Development">Infrastructure Development</option>
+                                                        <option value="Staff Training and Development">Staff Training and Development</option>
+                                                        <option value="Emergency Response">Emergency Response</option>
+                                                        <option value="Technology Implementation">Technology Implementation</option>
+                                                        <option value="Data Analysis and Reporting">Data Analysis and Reporting</option>
+                                                        <option value="Community Engagement">Community Engagement</option>
+                                                        <option value="Environmental Impact Assessment">Environmental Impact Assessment</option>
+                                                        <option value="Water Resource Management">Water Resource Management</option>
+                                                        <option value="Legal and Policy Knowledge">Legal and Policy Knowledge</option>
+                                                        <option value="Supply and Demand Forecasting">Supply and Demand Forecasting</option>
+                                                        <option value="Infrastructure Asset Management">Infrastructure Asset Management</option>
+                                                        <option value="Water Sampling and Testing">Water Sampling and Testing</option>
+                                                        <option value="Customer Billing and Account Management">Customer Billing and Account Management</option>
+                                                        <option value="Operational Efficiency">Operational Efficiency</option>
+                                                        <option value="Health and Safety Standards">Health and Safety Standards</option>
+                                                        <option value="Water Loss Control">Water Loss Control</option>
+                                                    </select>
                                                     <p>Skills</p>
                                                 </div>
                                             </td>

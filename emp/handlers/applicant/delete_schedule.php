@@ -3,7 +3,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '../smarthr/vendor/autoload.php';
+require '../../../vendor/autoload.php';
 require "../../../database/connection.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
