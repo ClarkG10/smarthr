@@ -57,9 +57,6 @@ require "handlers/logged_info.php";
                             <h3>Update Scores</h3>
                             <button onclick="closeModal()" style="background-color: white; font-weight: 700; border: none; padding: 5px; border-radius: 5px">X</button>
                         </div>
-                        <div style="margin-bottom: 10px; display: flex; justify-content: end;">
-                            <button type="button" onclick="toggleMaxScores()" style="background-color: lightgray; border: none; padding: 5px; border-radius: 5px;">Show Max Scores and Formula</button>
-                        </div>
                         <form action="handlers/applicant/update_scores.php" method="POST" onsubmit="return validateScores()">
                             <input type="hidden" name="applied_id" value="<?php echo htmlspecialchars($applicationData['applied_id']) ?>">
 
@@ -115,23 +112,19 @@ require "handlers/logged_info.php";
                                     <li>Skills: 10</li>
                                 </ul>
                                 <br>
-                                <h4>Formula</h4>
+                                <h4>Formula:</h4>
                                 <p><strong>Partial Rating:</strong> ((Education + Training + Experience + Eligibility + Competency + Skills) / 100) * 50</p>
-                                <p><strong>Resume Points:</strong> (Resume Points / 100) * 50</p>
+                                <p><strong>Resume Points:</strong> (Resume Points / 100) * 50</p><br>
                                 <p><strong>Final Rating:</strong> Partial Score + Resume Score</p>
                             </div>
 
-                            <div style="margin-top: 10px; display: flex; justify-content: end;">
+                            <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+                                <button type="button" onclick="toggleMaxScores()" style="background-color: lightgray; border: none; padding: 5px; border-radius: 5px;">Show Max Scores and Formula</button>
                                 <button type="submit" style="background-color: blue; color: white; border: none; padding: 5px; border-radius: 5px;">Save Changes</button>
                             </div>
                         </form>
                     </div>
                 </div>
-
-
-
-
-
                 <div class="form">
                     <form action="handlers/apply_process.php" method="POST" class="inputForm" enctype="multipart/form-data">
                         <input type="hidden" name="applied_job_id" value="<?php echo htmlspecialchars($applicationData['job_id']) ?>">
@@ -335,7 +328,7 @@ require "handlers/logged_info.php";
                                         <tr>
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <input type="text" value="<?php echo htmlspecialchars($applicationData['applied_experience']) ?> years" placeholder="None" readonly>
+                                                    <input type="text" value="<?php echo htmlspecialchars($applicationData['applied_experience']) ?>" placeholder="None" readonly>
                                                     <p>Experience</p>
                                                 </div>
                                             </td>
@@ -402,7 +395,6 @@ require "handlers/logged_info.php";
                                             <td colspan="3">
                                                 <div class="td">
                                                     <?php
-                                                    // Decode the JSON data to an array
                                                     $certificates = json_decode($applicationData['applied_file_certificate'], true);
 
                                                     if (!empty($certificates) && is_array($certificates)): ?>
@@ -422,7 +414,6 @@ require "handlers/logged_info.php";
                                             <td colspan="3">
                                                 <div class="td">
                                                     <?php
-                                                    // Decode the JSON data to an array
                                                     $trainingCerts = json_decode($applicationData['applied_file_training_cert'], true);
 
                                                     if (!empty($trainingCerts) && is_array($trainingCerts)): ?>

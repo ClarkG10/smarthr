@@ -4,11 +4,7 @@ require "../../database/connection.php";
 require "authenticate.php";
 require "user_logged.php";
 
-// dependencies for parsing PDFs and DOCX files
-require '../../vendor/autoload.php'; // Adjust path as needed
-
-use PhpOffice\PhpWord\IOFactory;
-use Smalot\PdfParser\Parser;
+require '../../vendor/autoload.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $applied_job_id = $_POST['applied_job_id'];
@@ -69,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $unique_file_name = uniqid(time() . '_', true) . '.' . $file_type;
         $target_file = $upload_dir . $unique_file_name;
 
-        // Allow only pdf, doc, docx files
         $allowed_types = array("pdf", "doc", "docx");
         if (!in_array($file_type, $allowed_types)) {
             return false;
@@ -122,72 +117,71 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $filecertificate_paths = !empty($filecertificate_paths) ? json_encode($filecertificate_paths) : '[]';
     $filecertificateTraining_paths = !empty($filecertificateTraining_paths) ? json_encode($filecertificateTraining_paths) : '[]';
 
-    // Log multiple uploaded paths for debugging
     echo "<script>console.log('File Certificate Paths: " . $filecertificate_paths . "');</script>";
     echo "<script>console.log('File Certificate Training Paths: " . $filecertificateTraining_paths . "');</script>";
 
-    // // Function to parse documents (PDF, DOCX)
-    // function parseFileToText($filePath)
-    // {
-    //     $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-    //     $text = '';
+    $experience_points = [
+        ['experience' => '0 Less than 1 year', 'points' => 3],
+        ['experience' => '1 year', 'points' => 5],
+        ['experience' => '2 years', 'points' => 8],
+        ['experience' => '3 years', 'points' => 10],
+        ['experience' => '4 years', 'points' => 12],
+        ['experience' => '5 years', 'points' => 14],
+        ['experience' => '6 years', 'points' => 16],
+        ['experience' => '7 years', 'points' => 18],
+        ['experience' => '8 years', 'points' => 20],
+        ['experience' => '9 years', 'points' => 22],
+        ['experience' => '10-14 years', 'points' => 25],
+        ['experience' => '15-19 years', 'points' => 28],
+        ['experience' => '20+ years', 'points' => 30],
+    ];
 
-    //     if ($fileExtension == "pdf") {
-    //         $parser = new Parser();
-    //         try {
-    //             $pdf = $parser->parseFile($filePath);
-    //             $text = $pdf->getText();
+    $education_points = [
+        ['level' => '1 Elementary', 'points' => 5],
+        ['level' => '2 High School', 'points' => 10],
+        ['level' => '3 Vocational', 'points' => 15],
+        ['level' => '4 College', 'points' => 18],
+        ['level' => '5 Postgraduate', 'points' => 20],
+    ];
 
-    //             // Sanitize and escape the text for use in JavaScript
-    //             $jsonText = json_encode($text);
-    //             echo "<script>console.log('Parsed PDF Text: " . $jsonText . "');</script>";
-    //         } catch (Exception $e) {
-    //             error_log('Error parsing PDF: ' . $e->getMessage());
-    //         }
-    //     } elseif ($fileExtension == "docx" || $fileExtension == "doc") {
-    //         try {
-    //             $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
-    //             foreach ($phpWord->getSections() as $section) {
-    //                 foreach ($section->getElements() as $element) {
-    //                     // Check if the element is a Text element
-    //                     if ($element instanceof \PhpOffice\PhpWord\Element\Text) {
-    //                         $text .= $element->getText() . "\n";
-    //                     }
-    //                     // handle multiple text elements. if daghay text element kani ang e run
-    //                     elseif ($element instanceof \PhpOffice\PhpWord\Element\TextRun) {
-    //                         // for each text element sa group of element which also called textRun 
-    //                         // iyang e loop
-    //                         foreach ($element->getElements() as $subElement) {
-    //                             // subElement is mao naning text element and ang e consider nga text element is 
-    //                             // before magka new line 
-    //                             if ($subElement instanceof \PhpOffice\PhpWord\Element\Text) {
-    //                                 // echo "<script>console.log(' subElement Parsed DOCX Text: " . $subElement->getText() . "');</script>";
-    //                                 $text .= $subElement->getText();
-    //                             }
-    //                         }
-    //                         // after each text element mag add tag new line
-    //                         $text .= "\n";
-    //                     }
-    //                 }
-    //             }
+    foreach ($experience_points as $exp) {
+        $applicant_exp = intval(explode(' ', $experience)[0]);
+        $fixed_pts_exp = intval(explode(' ', $exp['experience'])[0]);
+        $min_exp = strpos($jobMinimumExperience, "Less") === 0
+            ? 0
+            : intval(preg_split('/[\s\-+]+/', $jobMinimumExperience)[0]);
 
-    //             // Sanitize and escape the text for use in JavaScript
-    //             $jsonText = json_encode($text);
-    //             echo "<script>console.log('Parsed DOCX Text: " . $jsonText . "');</script>";
-    //         } catch (Exception $e) {
-    //             error_log('Error parsing DOC/DOCX: ' . $e->getMessage());
-    //         }
-    //     }
+        if ($jobMinimumExperience === "None Required" || $min_exp <= $applicant_exp) {
+            $scores['experience'] = 30;
+            break;
+        }
 
-    //     return $text;
-    // }
+        if ($applicant_exp === $fixed_pts_exp) {
+            $scores['experience'] = $exp['points'];
+            break;
+        }
+    }
 
+    foreach ($education_points as $edu) {
+        $applicant_edu = intval(explode(' ', $education)[0]);
+        $fixed_pts_edu = intval(explode(' ', $edu['level'])[0]);
+        $min_edu = $jobMinimumEducation === "None Required"
+            ? 0
+            : intval(explode(' ', $jobMinimumEducation)[0]);
 
+        if ($jobMinimumEducation === "None Required" || $min_edu <= $applicant_edu) {
+            $scores['education'] = 20;
+            break;
+        }
+
+        if ($applicant_edu === $fixed_pts_edu) {
+            $scores['education'] = $edu['points'];
+            break;
+        }
+    }
 
     $minimumQualification = [
-        "education" => $_POST['job_minimum_education'] ?? '',
         "training certificates" => $_POST['job_minimum_training'] ?? '',
-        "experience" => $_POST['job_minimum_experience'] ?? '',
         "eligibility" => $_POST['job_minimum_eligibility'] ?? '',
         "competency" => $_POST['job_minimum_competency'] ?? '',
         "skills" => $_POST['job_minimum_skills'] ?? '',
@@ -196,9 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     echo "<script>console.log('Job Qualification: " . json_encode($minimumQualification) . "');</script>";
 
     $applicantQualification = [
-        "education" => $_POST['education'] ?? '',
         "training certificates" => $_POST['training'] ?? 'None',
-        "experience" => $_POST['experience'] ?? '',
         "eligibility" => $_POST['eligibility'] ?? 'None',
         "competency" => $_POST['competency'] ?? 'None',
         "skills" => $_POST['skills'] ?? 'None',
@@ -207,9 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     echo "<script>console.log('Applicant Qualification: " . json_encode($applicantQualification) . "');</script>";
 
     $qualificationPoints = [
-        "education" => 20,
         "training certificates" => 10,
-        "experience" => 30,
         "eligibility" => 15,
         "competency" => 15,
         "skills" => 10,
@@ -281,8 +271,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         return 0;
     }
 
-    $finalQualificationScore = 0;
-    $scores = []; // Initialize the scores array
 
     foreach ($minimumQualification as $index => $minRequirement) {
         $applicantData = $applicantQualification[$index] ?? '';
@@ -300,16 +288,17 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Log the score for debugging
         echo "<script>console.log('Score for $index: " . $score . "');</script>";
 
-        $finalQualificationScore += $score;
-
         $scores[$index] = $score;
     }
+
+    // Calculate the final qualification score
+    $finalQualificationScore = array_sum($scores);
 
     $partialRating = ($finalQualificationScore / 100) * 50;
     $finalRating = $partialRating;
 
     // Log the final qualification score
-    echo "<script>console.log('Final Qualification Score: " . $finalQualificationScore . "');</script>";
+    echo "<script>console.log('Final Qualification Score: " . $education . "');</script>";
 
     // update program 
     $final_program = $program === 'Others' ? $other_program : $program;
@@ -347,7 +336,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             `skill_points`
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-
 
         $insert_scores_sql->bind_param(
             "iiddddddd",

@@ -157,7 +157,7 @@ require "handlers/user_logged.php";
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="8">No Appplication Found</td>
+                                        <td colspan="9">No Appplication Found</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

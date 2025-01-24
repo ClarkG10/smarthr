@@ -2,10 +2,8 @@
 
 require "../../../database/connection.php";
 
-// Get the applied_id from the URL parameter
 $applied_id = $_GET['applied_id'];
 
-// Validate the applied_id
 if (!is_numeric($applied_id)) {
     echo json_encode(['error' => 'Invalid applied ID']);
     exit;
@@ -24,7 +22,7 @@ if ($stmt === false) {
     exit;
 }
 
-$stmt->bind_param("i", $applied_id); // Bind the parameter
+$stmt->bind_param("i", $applied_id);
 $stmt->execute();
 $stmt->bind_result(
     $resume_points,
@@ -42,9 +40,6 @@ if ($stmt->error) {
     exit;
 }
 
-
-
-// Return the score details as JSON
 echo json_encode([
     'resume_points' => $resume_points,
     'education_points' => $education_points,

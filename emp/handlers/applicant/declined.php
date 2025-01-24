@@ -3,7 +3,6 @@
 require "../../../database/connection.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    // Sanitize and get POST data
     $decline_candidate_id = $_POST['decline_candidate_id'];
     $remarks = $_POST['remarks'];
 

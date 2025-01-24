@@ -238,7 +238,7 @@ require "handlers/user_logged.php";
                                         <tr>
                                             <td colspan="3">
                                                 <div class="td">
-                                                    <input type="text" value="<?php echo htmlspecialchars($applicationData['applied_experience']) ?> years" placeholder="None" readonly>
+                                                    <input type="text" value="<?php echo htmlspecialchars($applicationData['applied_experience']) ?>" placeholder="None" readonly>
                                                     <p>Experience</p>
                                                 </div>
                                             </td>

@@ -197,6 +197,7 @@ require "handlers/logged_info.php";
                                     </td>
                                     <td></td>
                                     <td></td>
+                                    <td></td>
                                 </tr>
                             </thead>
                             <?php
@@ -300,7 +301,7 @@ require "handlers/logged_info.php";
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="9">No New Applicants Found</td>
+                                        <td colspan="13">No New Applicants Found</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

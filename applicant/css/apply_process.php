@@ -7,6 +7,9 @@ require "user_logged.php";
 // dependencies for parsing PDFs and DOCX files
 require '../../vendor/autoload.php'; // Adjust path as needed
 
+use PhpOffice\PhpWord\IOFactory;
+use Smalot\PdfParser\Parser;
+
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $applied_job_id = $_POST['applied_job_id'];
     $street = $_POST['street'];
@@ -123,95 +126,62 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     echo "<script>console.log('File Certificate Paths: " . $filecertificate_paths . "');</script>";
     echo "<script>console.log('File Certificate Training Paths: " . $filecertificateTraining_paths . "');</script>";
 
-    $programs = [
-        ['name' => 'Plumbing Technology', 'points' => 20],
-        ['name' => 'Electrical Installation and Maintenance', 'points' => 15],
-        ['name' => 'Refrigeration and Air-conditioning Servicing', 'points' => 10],
-        ['name' => 'Construction Technology', 'points' => 18],
-        ['name' => 'Heavy Equipment Operation', 'points' => 12],
-        ['name' => 'Industrial Engineering Technology', 'points' => 14],
-        ['name' => 'Graphic Design', 'points' => 5],
-        ['name' => 'Bachelor of Science in Civil Engineering', 'points' => 20],
-        ['name' => 'Bachelor of Science in Environmental Science', 'points' => 18],
-        ['name' => 'Bachelor of Science in Public Administration', 'points' => 12],
-        ['name' => 'Bachelor of Science in Business Administration', 'points' => 10],
-        ['name' => 'Bachelor of Science in Mechanical Engineering', 'points' => 20],
-        ['name' => 'Bachelor of Science in Electrical Engineering', 'points' => 15],
-        ['name' => 'Bachelor of Science in Geology', 'points' => 14],
-        ['name' => 'Bachelor of Science in Statistics', 'points' => 8],
-        ['name' => 'Bachelor of Science in Information Technology', 'points' => 5],
-        ['name' => 'Bachelor of Science in Accounting', 'points' => 10],
-        ['name' => 'Bachelor of Science in Marketing', 'points' => 6],
-        ['name' => 'Bachelor of Science in Human Resource Management', 'points' => 6],
-        ['name' => 'Bachelor of Science in Chemistry', 'points' => 12],
-        ['name' => 'Bachelor of Science in Physics', 'points' => 10],
-        ['name' => 'Bachelor of Science in Economics', 'points' => 8],
-        ['name' => 'Bachelor of Science in Urban Planning', 'points' => 14],
-        ['name' => 'Master of Public Administration', 'points' => 10],
-        ['name' => 'Master of Science in Environmental Science', 'points' => 20],
-        ['name' => 'Master of Science in Civil Engineering', 'points' => 20],
-        ['name' => 'Doctor of Philosophy in Environmental Science', 'points' => 20],
-        ['name' => 'Doctor of Philosophy in Civil Engineering', 'points' => 20],
-        ['name' => 'Master of Business Administration', 'points' => 10],
-        ['name' => 'Master of Science in Urban Planning', 'points' => 18],
-        ['name' => 'Master of Science in Project Management', 'points' => 15],
-        ['name' => 'Master of Science in Water Resource Management', 'points' => 20],
-        ['name' => 'Master of Science in Finance', 'points' => 8]
-    ];
+    // // Function to parse documents (PDF, DOCX)
+    // function parseFileToText($filePath)
+    // {
+    //     $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+    //     $text = '';
 
+    //     if ($fileExtension == "pdf") {
+    //         $parser = new Parser();
+    //         try {
+    //             $pdf = $parser->parseFile($filePath);
+    //             $text = $pdf->getText();
 
-    $experience_points = [
-        ['experience' => 'Less than 1 year', 'points' => 5],
-        ['experience' => '1 year', 'points' => 8],
-        ['experience' => '2 years', 'points' => 10],
-        ['experience' => '3 years', 'points' => 12],
-        ['experience' => '4 years', 'points' => 15],
-        ['experience' => '5 years', 'points' => 18],
-        ['experience' => '6-9 years', 'points' => 22],
-        ['experience' => '10 years', 'points' => 25],
-        ['experience' => '15 years', 'points' => 28],
-        ['experience' => '20 years', 'points' => 30]
-    ];
+    //             // Sanitize and escape the text for use in JavaScript
+    //             $jsonText = json_encode($text);
+    //             echo "<script>console.log('Parsed PDF Text: " . $jsonText . "');</script>";
+    //         } catch (Exception $e) {
+    //             error_log('Error parsing PDF: ' . $e->getMessage());
+    //         }
+    //     } elseif ($fileExtension == "docx" || $fileExtension == "doc") {
+    //         try {
+    //             $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
+    //             foreach ($phpWord->getSections() as $section) {
+    //                 foreach ($section->getElements() as $element) {
+    //                     // Check if the element is a Text element
+    //                     if ($element instanceof \PhpOffice\PhpWord\Element\Text) {
+    //                         $text .= $element->getText() . "\n";
+    //                     }
+    //                     // handle multiple text elements. if daghay text element kani ang e run
+    //                     elseif ($element instanceof \PhpOffice\PhpWord\Element\TextRun) {
+    //                         // for each text element sa group of element which also called textRun 
+    //                         // iyang e loop
+    //                         foreach ($element->getElements() as $subElement) {
+    //                             // subElement is mao naning text element and ang e consider nga text element is 
+    //                             // before magka new line 
+    //                             if ($subElement instanceof \PhpOffice\PhpWord\Element\Text) {
+    //                                 // echo "<script>console.log(' subElement Parsed DOCX Text: " . $subElement->getText() . "');</script>";
+    //                                 $text .= $subElement->getText();
+    //                             }
+    //                         }
+    //                         // after each text element mag add tag new line
+    //                         $text .= "\n";
+    //                     }
+    //                 }
+    //             }
 
+    //             // Sanitize and escape the text for use in JavaScript
+    //             $jsonText = json_encode($text);
+    //             echo "<script>console.log('Parsed DOCX Text: " . $jsonText . "');</script>";
+    //         } catch (Exception $e) {
+    //             error_log('Error parsing DOC/DOCX: ' . $e->getMessage());
+    //         }
+    //     }
 
-    $skills = [
-        'Water Treatment' => 9,
-        'Water Distribution' => 8,
-        'Customer Service' => 7,
-        'Maintenance and Repair' => 6,
-        'Water Conservation' => 8,
-        'Quality Control' => 10,
-        'System Design and Engineering' => 9,
-        'Regulatory Compliance' => 7,
-        'Project Management' => 8,
-        'Financial Management' => 6,
-        'Supply Chain Management' => 7,
-        'Risk Management' => 6,
-        'Infrastructure Development' => 8,
-        'Staff Training and Development' => 7,
-        'Emergency Response' => 9,
-        'Technology Implementation' => 8,
-        'Data Analysis and Reporting' => 7,
-        'Community Engagement' => 6,
-        'Environmental Impact Assessment' => 7,
-        'Water Resource Management' => 9,
-        'Legal and Policy Knowledge' => 6,
-        'Supply and Demand Forecasting' => 6,
-        'Infrastructure Asset Management' => 8,
-        'Water Sampling and Testing' => 7,
-        'Customer Billing and Account Management' => 6,
-        'Operational Efficiency' => 8,
-        'Health and Safety Standards' => 7,
-        'Water Loss Control' => 8,
-    ];
+    //     return $text;
+    // }
 
-    $education_points = [
-        ['level' => 'Elementary', 'points' => 5],
-        ['level' => 'High School', 'points' => 10],
-        ['level' => 'Vocational', 'points' => 15],
-        ['level' => 'College', 'points' => 18],
-        ['level' => 'Postgraduate', 'points' => 20]
-    ];
 
 
     $minimumQualification = [
